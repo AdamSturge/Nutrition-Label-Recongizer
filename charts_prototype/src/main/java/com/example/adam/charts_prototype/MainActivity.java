@@ -27,30 +27,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       /* // create chart
-        LineChart chart = new LineChart(this.getApplicationContext());
-
-        // create data
-        ArrayList<Entry> entries = new ArrayList<Entry>();
-        entries.add(new Entry(0, 0));
-        entries.add(new Entry(1, 1));
-        LineDataSet dataSet = new LineDataSet(entries, "Label");
-        LineData lineData = new LineData(dataSet);
-
-        // add data to chart
-        chart.setData(lineData);
-
-        // Set chart view layout parameters
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,RelativeLayout.LayoutParams.MATCH_PARENT);
-        chart.setLayoutParams(params);
-
-        // get a layout defined in xml
-        RelativeLayout rl = (RelativeLayout) findViewById(R.id.activity_main);
-
-        rl.addView(chart); // add the programmatically created chart
-
-        chart.invalidate(); // refresh*/
-
         mChart = new CombinedChart(this.getApplicationContext());
 
         // draw bars behind lines
