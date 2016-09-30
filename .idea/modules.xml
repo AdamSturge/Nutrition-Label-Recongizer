@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/NLR/NLR.iml" filepath="$PROJECT_DIR$/NLR/NLR.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Nutrition-Label-Recongizer.iml" filepath="$PROJECT_DIR$/Nutrition-Label-Recongizer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/charts_prototype/charts_prototype.iml" filepath="$PROJECT_DIR$/charts_prototype/charts_prototype.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ocr_prototype/ocr_prototype.iml" filepath="$PROJECT_DIR$/ocr_prototype/ocr_prototype.iml" />
+    </modules>
+  </component>
+</project>
