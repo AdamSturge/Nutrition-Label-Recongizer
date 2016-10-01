@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_camera"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true"
+    android:orientation="vertical">
+
+    <com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSourcePreview
+        android:id="@+id/preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1.0">
+
+        <com.example.adam.nutrition_label_recongizer.ocr.camera.GraphicOverlay
+            android:id="@+id/graphic_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSourcePreview>
+
+    <Button
+        android:id="@+id/camera_capture_button"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/camera_capture" />
+
+</LinearLayout>

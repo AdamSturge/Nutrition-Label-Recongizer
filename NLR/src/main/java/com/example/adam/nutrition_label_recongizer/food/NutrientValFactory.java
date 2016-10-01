@@ -1,0 +1,47 @@
+package com.example.adam.nutrition_label_recongizer.food;
+
+import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Created by Adam on 10/1/2016.
+ */
+
+public class NutrientValFactory {
+    /**
+     * Attempts to parse a block of text as a nutrient value by comparing the text
+     * to the Nutrient.Ntype enum.
+     * @param text text to be parsed
+     * @return the first matching nutrient type and value or null if none match
+     */
+    public NutrientVal buildFromText(String text){
+        Pattern pattern = Pattern.compile("(^|\\s)(\\d+)(\\s*)(\\w{1,2})($|\\s)"); //matches some number of spaces, number, unit, then some number of spaces
+
+        NutrientVal nutrientVal = null;
+        text = text.toLowerCase();
+
+        for(Nutrient.NType nType : Nutrient.NType.values()){
+            String nTypeName = nType.name().toLowerCase();
+            if(text.contains(nTypeName)){
+                Matcher matcher = pattern.matcher(text);
+                if(matcher.find()){
+                    String stringVal = matcher.group(2);
+                    String stringUnit = matcher.group(4);
+
+                    int val = Integer.parseInt(stringVal);
+                    switch (stringUnit){
+                        case "g"  : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.GRAM); break;
+                        case "mg" : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.MILLIGRAM); break;
+                        default   : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.GRAM); break;
+                    }
+
+                    break; // extracted info form this line, stop looking for more nutrient info
+                }
+            }
+        }
+
+        return nutrientVal;
+    }
+}
