@@ -6,7 +6,7 @@ package com.example.adam.nutrition_label_recongizer.nutrients;
 
 class Protein extends Nutrient {
     protected Protein(){
-        mName = NType.PROTEIN;
+        mType = NType.PROTEIN;
         mThreshold = 10;
         mIsGood = true;
     }

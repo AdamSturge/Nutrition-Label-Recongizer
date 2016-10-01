@@ -25,10 +25,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.adam.nutrition_label_recongizer.MainActivity;
 import com.example.adam.nutrition_label_recongizer.R;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
 import com.example.adam.nutrition_label_recongizer.food.NutrientValFactory;
+import com.example.adam.nutrition_label_recongizer.food.Serving;
+import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSource;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSourcePreview;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.GraphicOverlay;
@@ -40,6 +43,8 @@ import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class CameraActivity extends AppCompatActivity {
@@ -79,7 +84,7 @@ public class CameraActivity extends AppCompatActivity {
         mGraphicOverlay = (GraphicOverlay<OcrGraphic>) findViewById(R.id.graphic_overlay);
         mCaptureButton = (Button) findViewById(R.id.camera_capture_button);
 
-        mCaptureButton.setOnClickListener(new OnCaptureClickListener());
+        mCaptureButton.setOnClickListener(new OnCaptureClickListener(this));
 
         mOcrDetectorProcesser = new OcrDetectorProcessor(mGraphicOverlay);
 
@@ -400,27 +405,105 @@ public class CameraActivity extends AppCompatActivity {
 
     private class OnCaptureClickListener implements Button.OnClickListener{
 
+        private Activity mActivity;
+        private static final String FOOD_INTENT_KEY = "food";
+
+        public OnCaptureClickListener(Activity activity){
+            mActivity = activity;
+        }
+
         @Override
         public void onClick(View v) {
-            Log.e("ADAM","CLICK");
             SparseArray<TextBlock> detectionItems = mOcrDetectorProcesser.getDetectionItems().clone();
-            NutrientValFactory valFactory = new NutrientValFactory();
             ArrayList<NutrientVal> nutrientVals = new ArrayList<NutrientVal>();
-            for(int i = 0; i < detectionItems.size(); ++i){
+            int calories = 0;
+            Serving serving = new Serving(-1,"");
+            for(int i = 0; i < detectionItems.size(); ++i) {
                 int j = detectionItems.keyAt(i);
                 TextBlock textBlock = detectionItems.get(j);
-                ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
-                for(Line line : lines){
-                    NutrientVal nutrientVal = valFactory.buildFromText(line.getValue());
-                    if(nutrientVal != null){
-                        nutrientVals.add(nutrientVal);
-                    }
+                if(textBlock.getValue().toLowerCase().contains("calories")){
+                    calories = extractCalories(textBlock);
                 }
+                if(textBlock.getValue().toLowerCase().contains("per")){
+                    serving = extractServing(textBlock);
+                }
+                nutrientVals.addAll(extractNutrientVals(textBlock));
+
             }
 
-            FoodItem food = new FoodItem(nutrientVals,0,"food unit",0);
-            Log.e("ADAM",food.toString());
+            FoodItem food = new FoodItem(nutrientVals,serving,calories);
+            Intent intent = new Intent(mActivity, MainActivity.class);
+            intent.putExtra(FOOD_INTENT_KEY,food);
+            mActivity.startActivity(intent);
 
+        }
+
+        /**
+         * Extracts nutrient values out of a textblock
+         * @param textBlock
+         * @return List of nutrient values
+         */
+        private ArrayList<NutrientVal> extractNutrientVals(TextBlock textBlock){
+            NutrientValFactory valFactory = new NutrientValFactory();
+            ArrayList<NutrientVal> nutrientVals = new ArrayList<NutrientVal>();
+            ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
+            for(Line line : lines){
+                NutrientVal nutrientVal = valFactory.buildFromText(line.getValue());
+                if(nutrientVal != null){
+                    nutrientVals.add(nutrientVal);
+                }
+            }
+            return nutrientVals;
+        }
+
+        /**
+         * Attempts to extract the number of calories out of the string contained in a textblock
+         * @param textBlock
+         * @return number of calories, or -1 if failed to extract the info
+         */
+        private int extractCalories(TextBlock textBlock){
+            try{
+                ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
+                int calories = -1;
+                for(Line line : lines){
+                    if(line.getValue().toLowerCase().contains("calories")){
+                        String numbers = line.getValue().replaceAll("[^0-9]","");
+                        calories = numbers.isEmpty() ? -1 : Integer.parseInt(numbers);
+                    }
+                }
+                return calories;
+            }
+            catch (NumberFormatException e){
+                Log.e("extractCalories",e.toString());
+                return -1;
+            }
+        }
+
+        /**
+         * Attempts to extract the serving information out the the string contained in a textblock
+         * @param textBlock
+         * @return serving information, or null if failed
+         */
+        private Serving extractServing(TextBlock textBlock){
+            try{
+                ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
+                Serving serving = null;
+                Pattern pattern = Pattern.compile("(^|\\s)(per\\s+)(\\d+)(\\s*)(\\w+)($|\\s)", Pattern.CASE_INSENSITIVE);
+                for(Line line : lines){
+                    Matcher matcher = pattern.matcher(line.getValue());
+                    if(matcher.find()){
+                        String stringAmount = matcher.group(3);
+                        String unit = matcher.group(5);
+                        int amount = Integer.parseInt(stringAmount);
+                        serving = new Serving(amount,unit);
+                    }
+                }
+                return serving;
+            }
+            catch (NumberFormatException e){
+                Log.e("extractServing",e.toString());
+                return null;
+            }
 
         }
     }

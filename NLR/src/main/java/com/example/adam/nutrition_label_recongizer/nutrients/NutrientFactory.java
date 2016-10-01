@@ -5,9 +5,9 @@ package com.example.adam.nutrition_label_recongizer.nutrients;
  */
 
 public class NutrientFactory {
-    NutrientFactory(){};
+    public NutrientFactory(){};
 
-    Nutrient buildNutrient(Nutrient.NType name){
+    public Nutrient buildNutrient(Nutrient.NType name){
         Nutrient nutrient = null;
         switch (name){
             case PROTEIN:

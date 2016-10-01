@@ -6,7 +6,7 @@ package com.example.adam.nutrition_label_recongizer.nutrients;
 
 class Carbohydrate extends Nutrient {
     protected Carbohydrate(){
-        mName = NType.CARBOHYDRATE;
+        mType = NType.CARBOHYDRATE;
         mThreshold = 10;
         mIsGood = true;
     }

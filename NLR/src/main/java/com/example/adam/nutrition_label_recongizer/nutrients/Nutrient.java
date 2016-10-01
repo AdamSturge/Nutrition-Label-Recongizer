@@ -8,19 +8,19 @@ package com.example.adam.nutrition_label_recongizer.nutrients;
 public abstract class Nutrient {
     public enum NType {PROTEIN,CARBOHYDRATE};
 
-    protected NType mName;
-    protected double mThreshold;
+    protected NType mType;
+    protected float mThreshold;
     protected boolean mIsGood;
 
     public String toString(){
-        return "{ name: " + mName + ", threshold : " + mThreshold + ", isGood : " + mIsGood + "}";
+        return "{ type: " + mType + ", threshold : " + mThreshold + ", isGood : " + mIsGood + "}";
     }
 
-    public NType getName() {
-        return mName;
+    public NType getType() {
+        return mType;
     }
 
-    public double getThreshold() {
+    public float getThreshold() {
         return mThreshold;
     }
 
