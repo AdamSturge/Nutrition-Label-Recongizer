@@ -33,7 +33,7 @@ public class NutrientValFactory {
                         String stringVal = matcher.group(2);
                         String stringUnit = matcher.group(4);
 
-                        int val = Integer.parseInt(stringVal);
+                        float val = Float.parseFloat(stringVal);
                         switch (stringUnit){
                             case "g"  : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.GRAM); break;
                             case "mg" : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.MILLIGRAM); break;

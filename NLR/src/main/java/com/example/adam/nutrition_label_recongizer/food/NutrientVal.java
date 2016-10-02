@@ -70,7 +70,7 @@ public class NutrientVal implements Parcelable {
         public NutrientVal createFromParcel(Parcel source) {
             Bundle bundle = source.readBundle();
             Nutrient.NType nType = (Nutrient.NType)bundle.getSerializable(NUTRIENT_TYPE_BUNDLE_KEY);
-            int val = bundle.getInt(VALUE_BUNDLE_KEY);
+            float val = bundle.getFloat(VALUE_BUNDLE_KEY);
             unit unit = (unit)bundle.getSerializable(UNIT_BUNDLE_KEY);
 
             return new NutrientVal(nType,val,unit);

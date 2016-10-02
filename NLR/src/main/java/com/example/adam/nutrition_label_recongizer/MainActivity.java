@@ -71,9 +71,10 @@ public class MainActivity extends AppCompatActivity {
 
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             mFoodItem = getIntent().getParcelableExtra(FOOD_INTENT_KEY);
+            Log.e("MainActivity",mFoodItem.toString());
         }
 
-        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
+/*        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
         nv.add(new NutrientVal(Nutrient.NType.SODIUM,125, NutrientVal.unit.MILLIGRAM));
         nv.add(new NutrientVal(Nutrient.NType.FAT,6, NutrientVal.unit.GRAM));
         nv.add(new NutrientVal(Nutrient.NType.SAT_FAT,1, NutrientVal.unit.GRAM));
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         nv.add(new NutrientVal(Nutrient.NType.SUGAR,8, NutrientVal.unit.GRAM));
         nv.add(new NutrientVal(Nutrient.NType.PROTEIN,2, NutrientVal.unit.GRAM));
         nv.add(new NutrientVal(Nutrient.NType.FIBRE,3, NutrientVal.unit.GRAM));
-        mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);
+        mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);*/
 
         initializeDrawer();
 
