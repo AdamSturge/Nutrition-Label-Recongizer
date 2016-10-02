@@ -6,7 +6,7 @@ package com.example.adam.nutrition_label_recongizer.nutrients;
 
 
 public abstract class Nutrient {
-    public enum NType {PROTEIN,CARBOHYDRATE};
+    public enum NType {PROTEIN,CARBOHYDRATE,FAT,SAT_FAT,SUGAR,SODIUM,CHOLESTEROL,TRANS_FAT, FIBRE};
 
     protected NType mType;
     protected float mThreshold;
@@ -26,5 +26,17 @@ public abstract class Nutrient {
 
     public boolean isGood() {
         return mIsGood;
+    }
+
+    public int compareTo(Nutrient that){
+        if(mIsGood == that.isGood()){
+            return 0;
+        }
+        if(mIsGood && !that.isGood()){
+            return 1;
+        }
+
+        return -1;
+
     }
 }

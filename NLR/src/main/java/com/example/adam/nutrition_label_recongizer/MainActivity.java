@@ -9,10 +9,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -21,7 +23,9 @@ import android.widget.Toast;
 import com.example.adam.nutrition_label_recongizer.charting.NutrientChartBuilder;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
+import com.example.adam.nutrition_label_recongizer.food.Serving;
 import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
+import com.example.adam.nutrition_label_recongizer.nutrients.NutrientFactory;
 import com.example.adam.nutrition_label_recongizer.ocr.CameraActivity;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.*;
@@ -33,6 +37,10 @@ import com.github.mikephil.charting.formatter.AxisValueFormatter;
 import com.github.mikephil.charting.charts.CombinedChart.DrawOrder;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,10 +48,11 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
-
+    private Button mConsumeButton;
     private CombinedChart mChart;
 
     private static final String FOOD_INTENT_KEY = "food"; // Maybe should tie these keys to same source instead of relying on source and dest agreeing
+    private static final String USER_NUTRIENT_STORAGE_DAY_KEY = "NUTRIENTS LAST UPDATED ON DAY";
 
 
     private FoodItem mFoodItem;
@@ -57,9 +66,24 @@ public class MainActivity extends AppCompatActivity {
         setTitle("Nutrition Label Recognizer");
         getSupportActionBar().setShowHideAnimationEnabled(true);
 
+        mConsumeButton = (Button)findViewById(R.id.consume_food_button);
+        mConsumeButton.setOnClickListener(new OnConsumeClickListener());
+
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             mFoodItem = getIntent().getParcelableExtra(FOOD_INTENT_KEY);
         }
+
+        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
+        nv.add(new NutrientVal(Nutrient.NType.SODIUM,125, NutrientVal.unit.MILLIGRAM));
+        nv.add(new NutrientVal(Nutrient.NType.FAT,6, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.SAT_FAT,1, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.TRANS_FAT,0, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.CHOLESTEROL,15, NutrientVal.unit.MILLIGRAM));
+        nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,23, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.SUGAR,8, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.PROTEIN,2, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.FIBRE,3, NutrientVal.unit.GRAM));
+        mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);
 
         initializeDrawer();
 
@@ -148,147 +172,134 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void displayTestChart(){
-        mChart = new CombinedChart(this.getApplicationContext());
-
-        // draw bars behind lines
-        mChart.setDrawOrder(new DrawOrder[]{
-                DrawOrder.BAR, DrawOrder.BUBBLE, DrawOrder.CANDLE, DrawOrder.LINE, DrawOrder.SCATTER
-        });
-
-        mChart.setMaxVisibleValueCount(60);
-
-        mChart.setPinchZoom(true);
-
-        mChart.setDrawGridBackground(true);
-
-        mChart.setDrawBarShadow(false);
-
-        mChart.setDrawValueAboveBar(true);
-
-        mChart.setHighlightFullBarEnabled(false);
-
-        mChart.setDescription("");
-
-        mChart.animateY(1250, Easing.EasingOption.EaseInCubic);
-
-        XAxis xAxis = mChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(1.0f);
-        xAxis.setAxisMinValue(-1.0f);
-        xAxis.setAxisMaxValue(3.0f);
-        xAxis.setDrawGridLines(false);
-        xAxis.setAvoidFirstLastClipping(true);
-        xAxis.setTextSize(20f);
-        //xAxis.setCenterAxisLabels(true); // Causes crash!
-        xAxis.setValueFormatter(new AxisValueFormatter() {
-
-            private String[] mValues = new String[]{"protein","carbs"};
-
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                switch((int)value) {
-                    case 0 : return "protein";
-                    case 1 :return "carbs";
-                    default : return "";
-                }
-            }
-
-            // we don't draw numbers, so no decimal digits needed
-            @Override
-            public int getDecimalDigits() {  return 0; }
-        });
-        YAxis axisLeft = mChart.getAxisLeft();
-        axisLeft.setAxisMinValue(0.0f);
-
-        YAxis axisRight = mChart.getAxisRight();
-        axisRight.setEnabled(false);
-
-        /**---------------------------------------------------Bar Chart Begin----------------------------------------------------------------**/
-        BarData barData = new BarData();
-        barData.setBarWidth(0.9f);
-
-        ArrayList<BarEntry> barEntries = new ArrayList<BarEntry>();
-        barEntries.add(new BarEntry(0.0f,new float[]{3.0f,5.0f},"protein"));
-        BarDataSet dataSet1 = new BarDataSet(barEntries,"xxxxx");
-        dataSet1.setColors(new int[]{Color.GREEN,Color.GREEN});
-        dataSet1.setDrawValues(false);
-        barData.addDataSet(dataSet1);
-
-        ArrayList<BarEntry> barEntries2 = new ArrayList<BarEntry>();
-        barEntries2.add(new BarEntry(1.0f,new float[]{6.0f,1.0f},"carbs"));
-        BarDataSet dataSet2 = new BarDataSet(barEntries2,"xxxxx");
-        dataSet2.setColors(new int[]{Color.GREEN,Color.RED});
-        dataSet2.setDrawValues(false);
-        barData.addDataSet(dataSet2);
-        /**---------------------------------------------------Bar Chart End----------------------------------------------------------------**/
-        /**---------------------------------------------------Line Charts Begin----------------------------------------------------------------**/
-        LineData lineData = new LineData();
-
-        ArrayList<Entry> lineEntries = new ArrayList<Entry>();
-        lineEntries.add(new Entry(-0.45f,7,0f));
-        lineEntries.add(new Entry(0.45f,7,0f));
-        LineDataSet lineDataSet1 = new LineDataSet(lineEntries,"YYYYY");
-        lineDataSet1.setLineWidth(3f);
-        lineDataSet1.setDrawValues(false);
-        lineDataSet1.setColor(Color.YELLOW);
-        lineDataSet1.setDrawCircles(false);
-        lineData.addDataSet(lineDataSet1);
-
-        ArrayList<Entry> lineEntries2 = new ArrayList<Entry>();
-        lineEntries2.add(new Entry(1.0f - 0.45f,6,0f));
-        lineEntries2.add(new Entry(1.0f + 0.45f,6,0f));
-        LineDataSet lineDataSet2 = new LineDataSet(lineEntries2,"YYYYY");
-        lineDataSet2.setLineWidth(3f);
-        lineDataSet2.setDrawValues(false);
-        lineDataSet2.setColor(Color.YELLOW);
-        lineDataSet2.setDrawCircles(false);
-        lineData.addDataSet(lineDataSet2);
-
-        /**---------------------------------------------------Line Charts End----------------------------------------------------------------**/
-
-        // Set chart view layout parameters
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,RelativeLayout.LayoutParams.MATCH_PARENT);
-        mChart.setLayoutParams(params);
-
-        CombinedData data = new CombinedData();
-        data.setData(barData);
-        data.setData(lineData);
-        mChart.setData(data);
-
-        // get a layout defined in xml
-        FrameLayout rl = (FrameLayout) findViewById(R.id.content_frame);
-
-        rl.addView(mChart); // add the programmatically created chart
-
-
-        mChart.invalidate(); // refresh*/
-    }
-
     private void loadUserNutrients(){
         mNutrientVals = new ArrayList<NutrientVal>();
-
         SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
-        int userProtein = preferences.getInt(Nutrient.NType.PROTEIN.name(),10);
-        int userCarbs = preferences.getInt(Nutrient.NType.CARBOHYDRATE.name(),30);
 
-        mNutrientVals.add(new NutrientVal(Nutrient.NType.PROTEIN,userProtein, NutrientVal.unit.GRAM));
-        mNutrientVals.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,userCarbs, NutrientVal.unit.GRAM));
+        int lastStoredDay = preferences.getInt(USER_NUTRIENT_STORAGE_DAY_KEY ,1);
+        int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        if(lastStoredDay != today){
+            // Clear stored values
+            resetUserNutrients();
+        }
+
+        for(Nutrient.NType nType : Nutrient.NType.values()){
+            float val = preferences.getFloat(nType.name(),0.0f);
+            mNutrientVals.add(new NutrientVal(nType,val, NutrientVal.unit.GRAM));
+        }
 
     }
 
     private void drawChart(){
         NutrientChartBuilder chartBuilder = new NutrientChartBuilder(getApplicationContext());
+        NutrientFactory nutrientFactory = new NutrientFactory();
+
+        sortNutrientVals(mNutrientVals);
+
         for(NutrientVal nutrientVal : mNutrientVals){
-            chartBuilder.addNutrient(nutrientVal,Color.RED);
+            Nutrient nutrient = nutrientFactory.buildNutrient(nutrientVal.getType());
+            if(mFoodItem != null){
+                NutrientVal foodVal = matchFoodNutrientToUserNutrient(nutrientVal);
+                if(foodVal != null){
+                    chartBuilder.addNutrient(new Pair<NutrientVal, NutrientVal>(nutrientVal,foodVal),nutrient.isGood());
+                }else{
+                    chartBuilder.addNutrient(nutrientVal,nutrient.isGood());
+                    // TO DO : ADD CODE TO GREY OUT MISSING DATA
+                }
+            }else{
+                chartBuilder.addNutrient(nutrientVal,nutrient.isGood());
+            }
         }
         CombinedChart chart = chartBuilder.build();
+
+        mChart = chart;
+
         // get a layout defined in xml
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.content_frame);
 
         frameLayout.addView(chart); // add the programmatically created chart
 
         chart.invalidate();
+    }
+
+    /**
+     * Matches user nutrient values to food item nutrient values
+     * based on nutrient type
+     * @param userNutrient
+     * @return
+     */
+    private NutrientVal matchFoodNutrientToUserNutrient(NutrientVal userNutrient){
+        if(mFoodItem == null){
+            return null;
+        }
+
+        ArrayList<NutrientVal> foodVals = mFoodItem.getNutrients();
+        for(NutrientVal nv : foodVals){
+            if(nv.getType() == userNutrient.getType()){
+                return nv;
+            }
+        }
+
+        return null;
+    }
+
+    private class OnConsumeClickListener implements Button.OnClickListener{
+
+        @Override
+        public void onClick(View v) {
+            updateBarColors();
+            saveUserNutrients();
+        }
+
+        private void updateBarColors(){
+            BarData barData = mChart.getBarData();
+            for(int i = 0; i < barData.getDataSetCount(); ++i){
+                BarDataSet set = (BarDataSet)barData.getDataSetByIndex(i);
+
+                List<Integer> oldColors = set.getColors();
+                set.setColor(oldColors.get(0)); // updates reference data in chart, no need to reassign to chart
+            }
+
+            mChart.invalidate();
+        }
+    }
+
+    private void saveUserNutrients(){
+        SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        BarData barData = mChart.getBarData();
+        for(int i = 0; i < barData.getDataSetCount(); ++i){
+            BarDataSet set = (BarDataSet)barData.getDataSetByIndex(i);
+            editor.putFloat(set.getLabel(),set.getEntryForIndex(0).getY());
+        }
+        editor.commit();
+    }
+
+    private void resetUserNutrients(){
+        SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        for(Nutrient.NType nType : Nutrient.NType.values()){
+            editor.putFloat(nType.name(),0.0f);
+        }
+        int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        editor.putInt(USER_NUTRIENT_STORAGE_DAY_KEY ,today);
+        Log.e("ResetUserVals",String.valueOf(today));
+        editor.commit();
+    }
+
+    private void sortNutrientVals(ArrayList<NutrientVal> vals){
+        Collections.sort(vals,new Comparator<NutrientVal>(){
+
+            private NutrientFactory nutrientFactory = new NutrientFactory();
+            @Override
+            public int compare(NutrientVal lhs, NutrientVal rhs) {
+                Nutrient nlhs = nutrientFactory.buildNutrient(lhs.getType());
+                Nutrient nrhs = nutrientFactory.buildNutrient(rhs.getType());
+                return nrhs.compareTo(nlhs);
+            }
+        });
     }
 
 }

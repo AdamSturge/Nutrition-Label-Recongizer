@@ -16,6 +16,27 @@ public class NutrientFactory {
             case CARBOHYDRATE:
                 nutrient = new Carbohydrate();
                 break;
+            case FAT:
+                nutrient = new Fat();
+                break;
+            case SAT_FAT:
+                nutrient = new SaturatedFat();
+                break;
+            case SUGAR:
+                nutrient = new Sugar();
+                break;
+            case SODIUM:
+                nutrient = new Sodium();
+                break;
+            case CHOLESTEROL:
+                nutrient = new Cholesterol();
+                break;
+            case TRANS_FAT:
+                nutrient = new TransFat();
+                break;
+            case FIBRE:
+                nutrient = new Fibre();
+                break;
         }
 
         return  nutrient;

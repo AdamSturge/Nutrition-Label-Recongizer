@@ -27,7 +27,7 @@ public class FoodItem implements Parcelable{
         mCalories = calories;
     }
 
-    public List<NutrientVal> getNutrients() {
+    public ArrayList<NutrientVal> getNutrients() {
         return mNutrients;
     }
 

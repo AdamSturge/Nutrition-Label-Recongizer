@@ -14,7 +14,7 @@ public class NutrientVal implements Parcelable {
     public enum unit {GRAM,MILLIGRAM};
 
     Nutrient.NType mType;
-    int mVal;
+    float mVal;
     unit mUnit;
 
     private static final String NUTRIENT_TYPE_BUNDLE_KEY = "nutrient type";
@@ -22,7 +22,7 @@ public class NutrientVal implements Parcelable {
     private static final String UNIT_BUNDLE_KEY = "unit";
 
 
-    public NutrientVal(Nutrient.NType name, int val,unit unit) {
+    public NutrientVal(Nutrient.NType name, float val,unit unit) {
         mType = name;
         mVal = val;
         mUnit = unit;
@@ -36,7 +36,7 @@ public class NutrientVal implements Parcelable {
         return mType.name();
     }
 
-    public int getVal() {
+    public float getVal() {
         return mVal;
     }
 
@@ -47,7 +47,6 @@ public class NutrientVal implements Parcelable {
     @Override
     public String toString(){
         return "{ type : " + mType.name() +", val : " + mVal+", unit : " + mUnit+" }";
-
     }
 
     @Override
@@ -59,7 +58,7 @@ public class NutrientVal implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         Bundle bundle = new Bundle();
         bundle.putSerializable(NUTRIENT_TYPE_BUNDLE_KEY, mType);
-        bundle.putInt(VALUE_BUNDLE_KEY,mVal);
+        bundle.putFloat(VALUE_BUNDLE_KEY,mVal);
         bundle.putSerializable(UNIT_BUNDLE_KEY,mUnit);
 
         dest.writeBundle(bundle);
