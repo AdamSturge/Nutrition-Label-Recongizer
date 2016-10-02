@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             mFoodItem = getIntent().getParcelableExtra(FOOD_INTENT_KEY);
-            Log.e("MainActivity",mFoodItem.toString());
+            mConsumeButton.setVisibility(View.VISIBLE);
         }
 
 /*        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
@@ -250,6 +250,8 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             updateBarColors();
             saveUserNutrients();
+            mConsumeButton.setVisibility(View.GONE);
+            mFoodItem = null;
         }
 
         private void updateBarColors(){
