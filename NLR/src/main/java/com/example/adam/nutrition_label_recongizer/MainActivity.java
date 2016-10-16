@@ -1,62 +1,58 @@
 package com.example.adam.nutrition_label_recongizer;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.support.annotation.RequiresPermission;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
+import android.text.Layout;
 import android.util.Pair;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ListView;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.adam.nutrition_label_recongizer.charting.NutrientChartBuilder;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
-import com.example.adam.nutrition_label_recongizer.food.Serving;
-import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
-import com.example.adam.nutrition_label_recongizer.nutrients.NutrientFactory;
+import com.example.adam.nutrition_label_recongizer.food.comparator.NutrientValComparatorIsGood;
+import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
+import com.example.adam.nutrition_label_recongizer.nutrient.NutrientFactory;
 import com.example.adam.nutrition_label_recongizer.ocr.CameraActivity;
-import com.github.mikephil.charting.animation.Easing;
+import com.example.adam.nutrition_label_recongizer.user.UserManager;
 import com.github.mikephil.charting.charts.*;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.*;
-import com.github.mikephil.charting.formatter.AxisValueFormatter;
-import com.github.mikephil.charting.charts.CombinedChart.DrawOrder;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private String[] mDrawerLabels;
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
-    private ActionBarDrawerToggle mDrawerToggle;
     private Button mConsumeButton;
     private CombinedChart mChart;
-
-    private static final String FOOD_INTENT_KEY = "food"; // Maybe should tie these keys to same source instead of relying on source and dest agreeing
-    private static final String USER_NUTRIENT_STORAGE_DAY_KEY = "NUTRIENTS LAST UPDATED ON DAY";
-
+    private UserManager mUserManager;
 
     private FoodItem mFoodItem;
-    private ArrayList<NutrientVal> mNutrientVals;
+    private ArrayList<NutrientVal> mUserNutrientVals;
+
+    private static final String FOOD_INTENT_KEY = "food"; // Maybe should tie these keys to same source instead of relying on source and dest agreeing
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +60,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         setTitle("Nutrition Label Recognizer");
-        getSupportActionBar().setShowHideAnimationEnabled(true);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        initializeDrawer(toolbar);
 
         mConsumeButton = (Button)findViewById(R.id.consume_food_button);
         mConsumeButton.setOnClickListener(new OnConsumeClickListener());
@@ -72,7 +70,10 @@ public class MainActivity extends AppCompatActivity {
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             mFoodItem = getIntent().getParcelableExtra(FOOD_INTENT_KEY);
             mConsumeButton.setVisibility(View.VISIBLE);
+            //findViewById(R.id.action_serving_size).setEnabled(true);
         }
+
+        mUserManager = new UserManager(getPreferences(getApplicationContext().MODE_PRIVATE));
 
 /*        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
         nv.add(new NutrientVal(Nutrient.NType.SODIUM,125, NutrientVal.unit.MILLIGRAM));
@@ -86,10 +87,7 @@ public class MainActivity extends AppCompatActivity {
         nv.add(new NutrientVal(Nutrient.NType.FIBRE,3, NutrientVal.unit.GRAM));
         mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);*/
 
-        initializeDrawer();
-
-        //displayTestChart();
-        loadUserNutrients();
+        mUserNutrientVals = mUserManager.loadUserNutrients();
         drawChart();
     }
 
@@ -106,99 +104,73 @@ public class MainActivity extends AppCompatActivity {
      * @author Adam Sturge
      * @since 2016-09-30
      */
-    private void initializeDrawer() {
+    private void initializeDrawer(Toolbar toolbar) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
 
-        mDrawerLabels = getResources().getStringArray(R.array.drawer_labels);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mDrawerLabels));
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
-            }
-        });
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.string.drawer_open,  /* "open drawer" description for accessibility */
-                R.string.drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            @Override
-            public void onDrawerClosed(View view) {
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
-        //mDrawerToggle.setDrawerArrowDrawable(new DrawerArrowDrawable(this.getApplicationContext()));
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-    }
-
-    /**
-     * Controls flow of application after a user selects an item from the drawer
-     * @param position index of the selected item in the list of drawer items
-     */
-    private void selectItem(int position){
-        switch(position){
-            case 0 :
-                mDrawerLayout.closeDrawers();
-                Intent intent = new Intent(this,CameraActivity.class);
-                startActivity(intent);
-                break;
-            default:break;
-        }
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState){
-        mDrawerToggle.syncState();
         super.onPostCreate(savedInstanceState);
-        //selectItem(0);
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Pass the event to ActionBarDrawerToggle, if it returns
-        // true, then it has handled the app icon touch event
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_serving_size) {
+            ServingSizeDialog dialog = new ServingSizeDialog();
+            Bundle args = new Bundle();
+            args.putString("unit",mFoodItem.getServing().getUnit());
+            dialog.setArguments(args);
+            dialog.show(getSupportFragmentManager(),"ServingSizeDialog");
             return true;
         }
-        // Handle your other action bar items...
 
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item); //handles drawer actions
     }
 
-    /**
-     * Loads consumed nutrients out of persistent storage
-     */
-    private void loadUserNutrients(){
-        mNutrientVals = new ArrayList<NutrientVal>();
-        SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
 
-        int lastStoredDay = preferences.getInt(USER_NUTRIENT_STORAGE_DAY_KEY ,1);
-        int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-        if(lastStoredDay != today){
-            // Clear stored values
-            resetUserNutrients();
+        if (id == R.id.nav_capture) {
+            Intent intent = new Intent(this,CameraActivity.class);
+            startActivity(intent);
         }
 
-        for(Nutrient.NType nType : Nutrient.NType.values()){
-            float val = preferences.getFloat(nType.name(),0.0f);
-            mNutrientVals.add(new NutrientVal(nType,val, NutrientVal.unit.GRAM));
-        }
-
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     /**
@@ -209,20 +181,20 @@ public class MainActivity extends AppCompatActivity {
         NutrientChartBuilder chartBuilder = new NutrientChartBuilder(getApplicationContext());
         NutrientFactory nutrientFactory = new NutrientFactory();
 
-        sortNutrientVals(mNutrientVals);
+        Collections.sort(mUserNutrientVals,new NutrientValComparatorIsGood());
 
-        for(NutrientVal nutrientVal : mNutrientVals){
+        for(NutrientVal nutrientVal : mUserNutrientVals){
             Nutrient nutrient = nutrientFactory.buildNutrient(nutrientVal.getType());
             if(mFoodItem != null){
                 NutrientVal foodVal = matchFoodNutrientToUserNutrient(nutrientVal);
                 if(foodVal != null){
-                    chartBuilder.addNutrient(new Pair<NutrientVal, NutrientVal>(nutrientVal,foodVal),nutrient.isGood());
+                    chartBuilder.addNutrient(new Pair<NutrientVal, NutrientVal>(nutrientVal,foodVal),nutrient.isGood(),true);
                 }else{
-                    chartBuilder.addNutrient(nutrientVal,nutrient.isGood());
+                    chartBuilder.addNutrient(nutrientVal,nutrient.isGood(),false);
                     // TO DO : ADD CODE TO GREY OUT MISSING DATA
                 }
             }else{
-                chartBuilder.addNutrient(nutrientVal,nutrient.isGood());
+                chartBuilder.addNutrient(nutrientVal,nutrient.isGood(),true);
             }
         }
         CombinedChart chart = chartBuilder.build();
@@ -238,8 +210,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Matches user nutrient values to food item nutrient values
-     * based on nutrient type
+     * Matches user nutrient values to food item nutrient values based on nutrient type
+     * TO DO : Maybe move this method somewhere else
      * @param userNutrient
      * @return
      */
@@ -247,14 +219,12 @@ public class MainActivity extends AppCompatActivity {
         if(mFoodItem == null){
             return null;
         }
-
         ArrayList<NutrientVal> foodVals = mFoodItem.getNutrients();
         for(NutrientVal nv : foodVals){
             if(nv.getType() == userNutrient.getType()){
                 return nv;
             }
         }
-
         return null;
     }
 
@@ -268,12 +238,19 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
+            updateUserNutrientVals();
+
             updateBarColors();
-            saveUserNutrients();
             mConsumeButton.setVisibility(View.GONE);
             mFoodItem = null;
+
+            mUserManager.saveUserNutrients(mUserNutrientVals);
+
         }
 
+        /**
+         * updates bar colors reflected newly consumed food item
+         */
         private void updateBarColors(){
             BarData barData = mChart.getBarData();
             for(int i = 0; i < barData.getDataSetCount(); ++i){
@@ -285,54 +262,26 @@ public class MainActivity extends AppCompatActivity {
 
             mChart.invalidate();
         }
-    }
 
-    /**
-     * Saves the current nutrient values to persistent storage
-     */
-    private void saveUserNutrients(){
-        SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        BarData barData = mChart.getBarData();
-        for(int i = 0; i < barData.getDataSetCount(); ++i){
-            BarDataSet set = (BarDataSet)barData.getDataSetByIndex(i);
-            editor.putFloat(set.getLabel(),set.getEntryForIndex(0).getY());
-        }
-        editor.commit();
-    }
-
-    /**
-     * Resets the nutrient values in persistent storage to zero. Updates last reset day
-     */
-    private void resetUserNutrients(){
-        SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-
-        for(Nutrient.NType nType : Nutrient.NType.values()){
-            editor.putFloat(nType.name(),0.0f);
-        }
-        int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-        editor.putInt(USER_NUTRIENT_STORAGE_DAY_KEY ,today);
-        Log.e("ResetUserVals",String.valueOf(today));
-        editor.commit();
-    }
-
-    /**
-     * sorts a list of nutrient vals by nutrient type
-     * @param vals
-     */
-    private void sortNutrientVals(ArrayList<NutrientVal> vals){
-        Collections.sort(vals,new Comparator<NutrientVal>(){
-
-            private NutrientFactory nutrientFactory = new NutrientFactory();
-            @Override
-            public int compare(NutrientVal lhs, NutrientVal rhs) {
-                Nutrient nlhs = nutrientFactory.buildNutrient(lhs.getType());
-                Nutrient nrhs = nutrientFactory.buildNutrient(rhs.getType());
-                return nrhs.compareTo(nlhs);
+        /**
+         * Updates member variable of user nutrients to add consumed food values
+         */
+        private void updateUserNutrientVals(){
+            BarData barData = mChart.getBarData();
+            ArrayList<NutrientVal> updatedNutrients = new ArrayList<NutrientVal>();
+            for(NutrientVal nutrientVal : mUserNutrientVals){
+                NutrientVal foodVal = matchFoodNutrientToUserNutrient(nutrientVal);
+                if(foodVal != null){
+                    updatedNutrients.add(new NutrientVal(nutrientVal.getType(),nutrientVal.getVal() + foodVal.getVal(),nutrientVal.getUnit()));
+                }else{
+                    updatedNutrients.add(nutrientVal);
+                }
             }
-        });
+
+            mUserNutrientVals = updatedNutrients;
+        }
     }
+
+
 
 }

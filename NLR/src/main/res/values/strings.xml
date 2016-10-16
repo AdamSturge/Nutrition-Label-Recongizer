@@ -16,4 +16,7 @@
     <string name="ocr_error">"Error reading text: %1$s"</string>
     <string name="camera_capture">"Capture text"</string>
     <string name="consume_food">"Consume"</string>
+    <string name="action_serving_size">Adjust serving size</string>
+    <string name="action_serving_size_set">Set</string>
+    <string name="action_serving_size_cancel">Cancel</string>
 </resources>

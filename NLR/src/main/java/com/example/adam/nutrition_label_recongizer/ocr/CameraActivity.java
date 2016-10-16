@@ -31,7 +31,6 @@ import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
 import com.example.adam.nutrition_label_recongizer.food.NutrientValFactory;
 import com.example.adam.nutrition_label_recongizer.food.Serving;
-import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSource;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSourcePreview;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.GraphicOverlay;

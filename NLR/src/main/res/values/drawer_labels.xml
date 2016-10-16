@@ -3,7 +3,5 @@
     <string-array
         name="drawer_labels">
         <item>Capture</item>
-        <item>Serving size</item>
-        <item>Consume</item>
     </string-array>
 </resources>

@@ -2,7 +2,7 @@ package com.example.adam.nutrition_label_recongizer.food;
 
 import android.util.Log;
 
-import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
+import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

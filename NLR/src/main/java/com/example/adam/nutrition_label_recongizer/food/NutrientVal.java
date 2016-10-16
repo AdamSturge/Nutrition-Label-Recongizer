@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
+import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 
 /**
  * Created by Adam on 9/30/2016.
@@ -22,7 +22,7 @@ public class NutrientVal implements Parcelable {
     private static final String UNIT_BUNDLE_KEY = "unit";
 
 
-    public NutrientVal(Nutrient.NType name, float val,unit unit) {
+    public NutrientVal(Nutrient.NType name, float val, unit unit) {
         mType = name;
         mVal = val;
         mUnit = unit;
@@ -81,4 +81,5 @@ public class NutrientVal implements Parcelable {
             return new NutrientVal[size];
         }
     };
+
 }

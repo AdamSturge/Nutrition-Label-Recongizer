@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/Nutrition-Label-Recongizer.iml" filepath="$PROJECT_DIR$/Nutrition-Label-Recongizer.iml" />
       <module fileurl="file://$PROJECT_DIR$/charts_prototype/charts_prototype.iml" filepath="$PROJECT_DIR$/charts_prototype/charts_prototype.iml" />
       <module fileurl="file://$PROJECT_DIR$/ocr_prototype/ocr_prototype.iml" filepath="$PROJECT_DIR$/ocr_prototype/ocr_prototype.iml" />
+      <module fileurl="file://$PROJECT_DIR$/toolbar_prototype/toolbar_prototype.iml" filepath="$PROJECT_DIR$/toolbar_prototype/toolbar_prototype.iml" />
     </modules>
   </component>
 </project>

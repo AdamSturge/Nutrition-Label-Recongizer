@@ -2,14 +2,11 @@ package com.example.adam.nutrition_label_recongizer.charting;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.util.Pair;
-import android.util.SparseArray;
 
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
-import com.example.adam.nutrition_label_recongizer.nutrients.Nutrient;
-import com.example.adam.nutrition_label_recongizer.nutrients.NutrientFactory;
-import com.example.adam.nutrition_label_recongizer.nutrients.Sugar;
+import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
+import com.example.adam.nutrition_label_recongizer.nutrient.NutrientFactory;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -51,6 +48,7 @@ public class NutrientChartBuilder {
 
     private static final String GOOD_NUTRIENT_COLOR = "#269fca";
     private static final String BAD_NUTRIENT_COLOR = "#e76182";
+    private static final String DISABLED_NUTRIENT_COLOR = "#d3d3d3";
     private static final String GOOD_NUTRIENT_LABEL = "Eat more of these";
     private static final String BAD_NUTRIENT_LABEL = "Limit these";
 
@@ -79,11 +77,11 @@ public class NutrientChartBuilder {
      * @param nutrientVal
      * @param isGood is nutrient good for you
      */
-    public void addNutrient(NutrientVal nutrientVal, boolean isGood){
+    public void addNutrient(NutrientVal nutrientVal, boolean isGood, boolean enabled){
         if(isGood){
-            addNutrientToGoodGroup(nutrientVal);
+            addNutrientToGoodGroup(nutrientVal,enabled);
         }else{
-            addNutrientToBadGroup(nutrientVal);
+            addNutrientToBadGroup(nutrientVal,enabled);
         }
         AddThreshold(nutrientVal.getType(), Color.BLACK);
 
@@ -91,11 +89,16 @@ public class NutrientChartBuilder {
         mNextBarCenter += mXAxisGranulatirty;
     }
 
-    public void addNutrient(Pair<NutrientVal,NutrientVal> nutrientVals, boolean isGood){
+    /**
+     * Adds a stacked bar representing already consumed and to be consumed nutrients
+     * @param nutrientVals
+     * @param isGood
+     */
+    public void addNutrient(Pair<NutrientVal,NutrientVal> nutrientVals, boolean isGood,boolean enabled){
         if(isGood){
-            addNutrientToGoodGroup(nutrientVals);
+            addNutrientToGoodGroup(nutrientVals,enabled);
         }else{
-            addNutrientToBadGroup(nutrientVals);
+            addNutrientToBadGroup(nutrientVals,enabled);
         }
         AddThreshold(nutrientVals.first.getType(), Color.BLACK);
 
@@ -107,46 +110,47 @@ public class NutrientChartBuilder {
      * Adds a nutrient value to the group of nutrients that are bad for you
      * @param nutrientVal
      */
-    private void addNutrientToBadGroup(NutrientVal nutrientVal){
+    private void addNutrientToBadGroup(NutrientVal nutrientVal,boolean enabled){
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
         entries.add(new BarEntry(mNextBarCenter,nutrientVal.getVal(),nutrientVal.getName()));
-        BarDataSet goodBarDataSet = buildBadNutrientDataSet(entries, nutrientVal.getName());
-        mBadBarDataSets.add(goodBarDataSet);
+        BarDataSet badBarDataSet = buildBadNutrientDataSet(entries, nutrientVal.getName(),enabled);
+
+        mBadBarDataSets.add(badBarDataSet);
     }
 
     /**
-     * Adds a nutrient value to the group of nutrients that are good for you
+     * Adds a stacked bar representing already consumed and to be consumed good nutrients
      * @param nutrientVal
      */
-    private void addNutrientToGoodGroup(NutrientVal nutrientVal){
+    private void addNutrientToGoodGroup(NutrientVal nutrientVal,boolean enabled){
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
         entries.add(new BarEntry(mNextBarCenter,nutrientVal.getVal(),nutrientVal.getName()));
-        BarDataSet goodBarDataSet = buildGoodNutrientDataSet(entries, nutrientVal.getName());
+        BarDataSet goodBarDataSet = buildGoodNutrientDataSet(entries, nutrientVal.getName(),enabled);
         mGoodBarDataSets.add(goodBarDataSet);
     }
 
     /**
-     * Adds a stacked bar to the chart representing already consumed and two be consumed bad nutrients
+     * Adds a stacked bar representing already consumed and to be consumed bad nutrients
      * @param nutrientVals
      */
-    private void addNutrientToBadGroup(Pair<NutrientVal,NutrientVal> nutrientVals){
+    private void addNutrientToBadGroup(Pair<NutrientVal,NutrientVal> nutrientVals,boolean enabled){
         float firstVal = nutrientVals.first.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.first.getVal() : nutrientVals.first.getVal()/1000.0f;
         float secondVal = nutrientVals.second.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.second.getVal() : nutrientVals.second.getVal()/1000.0f;
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
         entries.add(new BarEntry(mNextBarCenter, new float[]{firstVal,secondVal},nutrientVals.first.getName()));
-        BarDataSet badBarDataSet = buildBadNutrientDataSet(entries, nutrientVals.first.getName());
+        BarDataSet badBarDataSet = buildBadNutrientDataSet(entries, nutrientVals.first.getName(),enabled);
         mBadBarDataSets.add(badBarDataSet);
     }
     /**
      * Adds a stacked bar to the chart representing already consumed and two be consumed good nutrients
      * @param nutrientVals
      */
-    private void addNutrientToGoodGroup(Pair<NutrientVal,NutrientVal> nutrientVals){
+    private void addNutrientToGoodGroup(Pair<NutrientVal,NutrientVal> nutrientVals,boolean enabled){
         float firstVal = nutrientVals.first.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.first.getVal() : nutrientVals.first.getVal()/1000.0f;
         float secondVal = nutrientVals.second.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.second.getVal() : nutrientVals.second.getVal()/1000.0f;
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
         entries.add(new BarEntry(mNextBarCenter, new float[]{firstVal,secondVal},nutrientVals.first.getName()));
-        BarDataSet goodBarDataSet = buildGoodNutrientDataSet(entries, nutrientVals.first.getName());
+        BarDataSet goodBarDataSet = buildGoodNutrientDataSet(entries, nutrientVals.first.getName(),enabled);
         mGoodBarDataSets.add(goodBarDataSet);
     }
 
@@ -192,11 +196,17 @@ public class NutrientChartBuilder {
      * @param label label for the data set
      * @return BarDataSet
      */
-    private BarDataSet buildBadNutrientDataSet(ArrayList<BarEntry> entries, String label){
+    private BarDataSet buildBadNutrientDataSet(ArrayList<BarEntry> entries, String label, boolean enabled){
         BarDataSet badBarDataSet = new BarDataSet(entries,label);
         badBarDataSet.setDrawValues(false);
-        badBarDataSet.setColors(new int[] {Color.parseColor(BAD_NUTRIENT_COLOR), Color.TRANSPARENT});
-        badBarDataSet.setBarBorderColor(Color.parseColor(BAD_NUTRIENT_COLOR));
+        if(enabled){
+            badBarDataSet.setColors(new int[] {Color.parseColor(BAD_NUTRIENT_COLOR), Color.TRANSPARENT});
+            badBarDataSet.setBarBorderColor(Color.parseColor(BAD_NUTRIENT_COLOR));
+        }else{
+            badBarDataSet.setColors(new int[] {Color.parseColor(DISABLED_NUTRIENT_COLOR), Color.TRANSPARENT});
+            badBarDataSet.setBarBorderColor(Color.parseColor(DISABLED_NUTRIENT_COLOR));
+        }
+
         badBarDataSet.setBarBorderWidth(1.0f);
 
         return badBarDataSet;
@@ -208,11 +218,16 @@ public class NutrientChartBuilder {
      * @param label label for the data set
      * @return BarDataSet
      */
-    private BarDataSet buildGoodNutrientDataSet(ArrayList<BarEntry> entries, String label){
+    private BarDataSet buildGoodNutrientDataSet(ArrayList<BarEntry> entries, String label, boolean enabled){
         BarDataSet goodBarDataSet = new BarDataSet(entries,label);
         goodBarDataSet.setDrawValues(false);
-        goodBarDataSet.setColors(new int[] {Color.parseColor(GOOD_NUTRIENT_COLOR), Color.TRANSPARENT});
-        goodBarDataSet.setBarBorderColor(Color.parseColor(GOOD_NUTRIENT_COLOR));
+        if(enabled){
+            goodBarDataSet.setColors(new int[] {Color.parseColor(GOOD_NUTRIENT_COLOR), Color.TRANSPARENT});
+            goodBarDataSet.setBarBorderColor(Color.parseColor(GOOD_NUTRIENT_COLOR));
+        }else{
+            goodBarDataSet.setColors(new int[] {Color.parseColor(DISABLED_NUTRIENT_COLOR), Color.TRANSPARENT});
+            goodBarDataSet.setBarBorderColor(Color.parseColor(DISABLED_NUTRIENT_COLOR));
+        }
         goodBarDataSet.setBarBorderWidth(1.0f);
 
         return goodBarDataSet;

@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/NLR" />
             <option value="$PROJECT_DIR$/charts_prototype" />
             <option value="$PROJECT_DIR$/ocr_prototype" />
+            <option value="$PROJECT_DIR$/toolbar_prototype" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

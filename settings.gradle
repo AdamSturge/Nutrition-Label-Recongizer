@@ -1,1 +1,1 @@
-include ':NLR', ':charts_prototype', ':ocr_prototype'
+include ':NLR', ':charts_prototype', ':ocr_prototype', ':toolbar_prototype'
