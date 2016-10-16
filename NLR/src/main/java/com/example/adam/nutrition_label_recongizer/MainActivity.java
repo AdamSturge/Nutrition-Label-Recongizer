@@ -93,6 +93,13 @@ public class MainActivity extends AppCompatActivity {
         drawChart();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();  // Always call the superclass method first
+        //loadUserNutrients(); NEED TO DO SOME TESTING TO SEE IF THIS IS REQUIRED
+
+    }
+
     /**
      * Initializes the action drawer
      *
@@ -173,6 +180,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Loads consumed nutrients out of persistent storage
+     */
     private void loadUserNutrients(){
         mNutrientVals = new ArrayList<NutrientVal>();
         SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
@@ -191,6 +201,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Builds and draws a nutrient chart based on current nutrient values
+     * in persistent storage and any food items under consideration
+     */
     private void drawChart(){
         NutrientChartBuilder chartBuilder = new NutrientChartBuilder(getApplicationContext());
         NutrientFactory nutrientFactory = new NutrientFactory();
@@ -244,6 +258,12 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    /**
+     * Updates nutrient values in persistent storage.
+     * Removes food item under consideration
+     * Updates barchart to reflect consumed nutrients
+     * Hides consume button
+     */
     private class OnConsumeClickListener implements Button.OnClickListener{
 
         @Override
@@ -267,6 +287,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Saves the current nutrient values to persistent storage
+     */
     private void saveUserNutrients(){
         SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -279,6 +302,9 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    /**
+     * Resets the nutrient values in persistent storage to zero. Updates last reset day
+     */
     private void resetUserNutrients(){
         SharedPreferences preferences = getPreferences(getApplicationContext().MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -292,6 +318,10 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    /**
+     * sorts a list of nutrient vals by nutrient type
+     * @param vals
+     */
     private void sortNutrientVals(ArrayList<NutrientVal> vals){
         Collections.sort(vals,new Comparator<NutrientVal>(){
 
