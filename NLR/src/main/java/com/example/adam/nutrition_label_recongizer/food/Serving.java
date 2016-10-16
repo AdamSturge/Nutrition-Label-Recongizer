@@ -9,18 +9,18 @@ import android.os.Parcelable;
  */
 
 public class Serving implements Parcelable{
-    private int mAmount;
+    private float mAmount;
     private String mUnit;
 
     private static final String AMOUNT_BUNDLE_KEY = "amount";
     private static final String UNIT_BUNDLE_KEY = "unit";
 
-    public Serving(int amount, String unit) {
+    public Serving(float amount, String unit) {
         mAmount = amount;
         mUnit = unit;
     }
 
-    public int getAmount() {
+    public float getAmount() {
         return mAmount;
     }
 
@@ -41,7 +41,7 @@ public class Serving implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         Bundle bundle = new Bundle();
-        bundle.putInt(AMOUNT_BUNDLE_KEY,mAmount);
+        bundle.putFloat(AMOUNT_BUNDLE_KEY,mAmount);
         bundle.putString(UNIT_BUNDLE_KEY,mUnit);
 
         dest.writeBundle(bundle);
@@ -52,7 +52,7 @@ public class Serving implements Parcelable{
         @Override
         public Serving createFromParcel(Parcel source) {
             Bundle bundle = source.readBundle();
-            int amount = bundle.getInt(AMOUNT_BUNDLE_KEY);
+            float amount = bundle.getFloat(AMOUNT_BUNDLE_KEY);
             String unit = bundle.getString(UNIT_BUNDLE_KEY);
             return new Serving(amount,unit);
         }

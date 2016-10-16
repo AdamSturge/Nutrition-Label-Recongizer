@@ -489,14 +489,21 @@ public class CameraActivity extends AppCompatActivity {
             try{
                 ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
                 Serving serving = null;
-                Pattern pattern = Pattern.compile("(^|\\s)(per\\s+)(\\d+)(\\s*)(\\w+)($|\\s)", Pattern.CASE_INSENSITIVE);
+                Pattern pattern = Pattern.compile("(^|\\s)(\\w*)(per\\s+)(\\d+)(/\\d+)?(\\s*)(\\w+)($|\\s)", Pattern.CASE_INSENSITIVE);
                 for(Line line : lines){
                     Matcher matcher = pattern.matcher(line.getValue());
-                    if(matcher.find()){
-                        String stringAmount = matcher.group(3);
-                        String unit = matcher.group(5);
-                        int amount = Integer.parseInt(stringAmount);
+                    if(matcher.find() && matcher.groupCount() >= 7){
+                        String numer =  numer = matcher.group(4);
+                        String denom = "1.0";
+                        if(matcher.group(5) != null){
+                            denom = matcher.group(5).substring(1); //remove division operator;
+                        }
+
+                        String unit = matcher.group(7);
+                        float amount = Float.parseFloat(numer)/Float.parseFloat(denom);
                         serving = new Serving(amount,unit);
+                    }else{
+                        Log.e("extractServing","regex error");
                     }
                 }
                 return serving;
