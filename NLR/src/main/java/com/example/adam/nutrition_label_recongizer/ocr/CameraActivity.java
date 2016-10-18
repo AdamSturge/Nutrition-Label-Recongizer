@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -65,7 +66,7 @@ public class CameraActivity extends AppCompatActivity {
     private CameraSourcePreview mPreview;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
     private OcrDetectorProcessor mOcrDetectorProcesser;
-    private Button mCaptureButton;
+    private FloatingActionButton mCaptureButton;
 
     // Helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
@@ -81,7 +82,7 @@ public class CameraActivity extends AppCompatActivity {
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<OcrGraphic>) findViewById(R.id.graphic_overlay);
-        mCaptureButton = (Button) findViewById(R.id.camera_capture_button);
+        mCaptureButton = (FloatingActionButton) findViewById(R.id.camera_capture_button);
 
         mCaptureButton.setOnClickListener(new OnCaptureClickListener(this));
 
