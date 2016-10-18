@@ -17,12 +17,12 @@
         android:layout_height="match_parent"
         android:layout_weight="1.0"/>
 
-    <!--TO DO: Change button color -->
     <Button
         android:id="@+id/consume_food_button"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_marginTop="10dp"
+        android:theme="@style/Widget.AppCompat.Button.Colored"
         android:visibility="gone"
         android:text="@string/consume_food" />
 
