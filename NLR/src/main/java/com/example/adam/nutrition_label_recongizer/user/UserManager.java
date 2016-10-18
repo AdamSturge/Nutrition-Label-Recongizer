@@ -1,6 +1,7 @@
 package com.example.adam.nutrition_label_recongizer.user;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
 import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
@@ -17,12 +18,14 @@ public class UserManager {
     private SharedPreferences mPreferences;
 
     private static final String USER_NUTRIENT_STORAGE_DAY_KEY = "NUTRIENTS LAST UPDATED ON DAY";
+    private static final String PERCENT_VIEW_KEY = "PERCENT VIEW";
 
 
     public UserManager(SharedPreferences preferences)
     {
         mPreferences = preferences;
     }
+
     /**
      * Loads consumed nutrients out of persistent storage into ArrayList
      */
@@ -38,17 +41,20 @@ public class UserManager {
 
         for(Nutrient.NType nType : Nutrient.NType.values()){
             float val = mPreferences.getFloat(nType.name(),0.0f);
-            nutrientVals.add(new NutrientVal(nType,val, NutrientVal.unit.GRAM));
+            NutrientVal nutrientVal = new NutrientVal(nType,val);
+            nutrientVals.add(nutrientVal);
         }
 
         return nutrientVals;
 
     }
+
     /**
-     * Saves the current nutrient values to persistent storage
+     * Saves the current nutrient values to persistent storage.
      */
     public void saveUserNutrients(ArrayList<NutrientVal> nutrientVals){
         SharedPreferences.Editor editor = mPreferences.edit();
+
         for(NutrientVal nutrientVal : nutrientVals){
             editor.putFloat(nutrientVal.getName(),nutrientVal.getVal());
         }
@@ -66,6 +72,24 @@ public class UserManager {
         }
         int today = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
         editor.putInt(USER_NUTRIENT_STORAGE_DAY_KEY ,today);
+        editor.commit();
+    }
+
+    /**
+     * Loads the users preference for percent view or absolute view out of persistent storage
+     * @return boolean, true for percent view, false for absolute view
+     */
+    public boolean loadPercentViewPreference(){
+        return mPreferences.getBoolean(PERCENT_VIEW_KEY,false);
+    }
+
+    /**
+     * Saves the users prefernce for percent view or absolute view in persistent storage
+     * @param percentView
+     */
+    public void savePercentViewPreference(boolean percentView){
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putBoolean(PERCENT_VIEW_KEY,percentView);
         editor.commit();
     }
 }

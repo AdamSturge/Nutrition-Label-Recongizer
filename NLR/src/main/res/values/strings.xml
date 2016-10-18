@@ -19,4 +19,6 @@
     <string name="action_serving_size">Adjust serving size</string>
     <string name="action_serving_size_set">Set</string>
     <string name="action_serving_size_cancel">Cancel</string>
+    <string name="action_percent_view">Percent view</string>
+    <string name="action_absolute_view">Absolute view</string>
 </resources>

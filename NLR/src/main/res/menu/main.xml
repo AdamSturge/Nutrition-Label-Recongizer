@@ -3,4 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_serving_size" android:orderInCategory="100"
         android:title="@string/action_serving_size" app:showAsAction="never" android:enabled="false"/>
+    <item android:id="@+id/action_percent_view" android:orderInCategory="100"
+        android:title="@string/action_percent_view" app:showAsAction="never" android:enabled="true"/>
+    <item android:id="@+id/action_absolute_view" android:orderInCategory="100"
+        android:title="@string/action_absolute_view" app:showAsAction="never" android:enabled="true"/>
 </menu>

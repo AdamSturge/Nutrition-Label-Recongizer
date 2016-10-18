@@ -35,9 +35,9 @@ public class NutrientValFactory {
 
                         float val = Float.parseFloat(stringVal);
                         switch (stringUnit){
-                            case "g"  : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.GRAM); break;
-                            case "mg" : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.MILLIGRAM); break;
-                            default   : nutrientVal = new NutrientVal(nType,val, NutrientVal.unit.GRAM); break;
+                            case "g"  : nutrientVal = new NutrientVal(nType,val); break;
+                            case "mg" : nutrientVal = new NutrientVal(nType,val/1000f); break;
+                            default   : nutrientVal = new NutrientVal(nType,val); break;
                         }
 
                         break; // extracted info form this line, stop looking for more nutrient info

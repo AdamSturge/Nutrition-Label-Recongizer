@@ -2,6 +2,7 @@ package com.example.adam.nutrition_label_recongizer.charting;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.util.Pair;
 
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
@@ -112,7 +113,7 @@ public class NutrientChartBuilder {
      */
     private void addNutrientToBadGroup(NutrientVal nutrientVal,boolean enabled){
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
-        entries.add(new BarEntry(mNextBarCenter,nutrientVal.getVal(),nutrientVal.getName()));
+        entries.add(new BarEntry(mNextBarCenter,new float[]{nutrientVal.getVal()},nutrientVal.getName()));
         BarDataSet badBarDataSet = buildBadNutrientDataSet(entries, nutrientVal.getName(),enabled);
 
         mBadBarDataSets.add(badBarDataSet);
@@ -124,7 +125,7 @@ public class NutrientChartBuilder {
      */
     private void addNutrientToGoodGroup(NutrientVal nutrientVal,boolean enabled){
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
-        entries.add(new BarEntry(mNextBarCenter,nutrientVal.getVal(),nutrientVal.getName()));
+        entries.add(new BarEntry(mNextBarCenter,new float[]{nutrientVal.getVal()},nutrientVal.getName()));
         BarDataSet goodBarDataSet = buildGoodNutrientDataSet(entries, nutrientVal.getName(),enabled);
         mGoodBarDataSets.add(goodBarDataSet);
     }
@@ -134,10 +135,8 @@ public class NutrientChartBuilder {
      * @param nutrientVals
      */
     private void addNutrientToBadGroup(Pair<NutrientVal,NutrientVal> nutrientVals,boolean enabled){
-        float firstVal = nutrientVals.first.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.first.getVal() : nutrientVals.first.getVal()/1000.0f;
-        float secondVal = nutrientVals.second.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.second.getVal() : nutrientVals.second.getVal()/1000.0f;
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
-        entries.add(new BarEntry(mNextBarCenter, new float[]{firstVal,secondVal},nutrientVals.first.getName()));
+        entries.add(new BarEntry(mNextBarCenter, new float[]{nutrientVals.first.getVal(),nutrientVals.second.getVal()},nutrientVals.first.getName()));
         BarDataSet badBarDataSet = buildBadNutrientDataSet(entries, nutrientVals.first.getName(),enabled);
         mBadBarDataSets.add(badBarDataSet);
     }
@@ -146,27 +145,10 @@ public class NutrientChartBuilder {
      * @param nutrientVals
      */
     private void addNutrientToGoodGroup(Pair<NutrientVal,NutrientVal> nutrientVals,boolean enabled){
-        float firstVal = nutrientVals.first.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.first.getVal() : nutrientVals.first.getVal()/1000.0f;
-        float secondVal = nutrientVals.second.getUnit() == NutrientVal.unit.GRAM ? nutrientVals.second.getVal() : nutrientVals.second.getVal()/1000.0f;
         ArrayList<BarEntry> entries = new ArrayList<BarEntry>();
-        entries.add(new BarEntry(mNextBarCenter, new float[]{firstVal,secondVal},nutrientVals.first.getName()));
+        entries.add(new BarEntry(mNextBarCenter, new float[]{nutrientVals.first.getVal(),nutrientVals.second.getVal()},nutrientVals.first.getName()));
         BarDataSet goodBarDataSet = buildGoodNutrientDataSet(entries, nutrientVals.first.getName(),enabled);
         mGoodBarDataSets.add(goodBarDataSet);
-    }
-
-    /**
-     * Adds a bar to the chart representing the passed nutrient value
-     * Expected to be called alongside addThreshold()
-     * @param nutrientVal
-     * @param color bar color
-     */
-    private void AddBar(NutrientVal nutrientVal, int color){
-        ArrayList<BarEntry> barEntries = new ArrayList<BarEntry>();
-        barEntries.add(new BarEntry(mNextBarCenter,(float)nutrientVal.getVal(),nutrientVal.getName()));
-        BarDataSet dataSet = new BarDataSet(barEntries,"");
-        dataSet.setColor(color);
-        dataSet.setDrawValues(false);
-        mBarData.addDataSet(dataSet);
     }
 
     /**
@@ -345,6 +327,50 @@ public class NutrientChartBuilder {
         data.setData(mBarData);
         data.setData(mLineData);
         chart.setData(data);
+
+        return chart;
+    }
+
+    /**
+     * Builds a combined bar and line chart representing the data stored in the builder
+     * Values are divided by their threshold values to create a percent bar chart
+     * @return
+     */
+    public CombinedChart buildPercentChart(){
+        CombinedChart chart = build();
+
+        for(int i = 0; i < mLineData.getDataSetCount(); ++i){
+            LineDataSet absoluteLineDataSet = (LineDataSet)mLineData.getDataSets().get(i);
+            absoluteLineDataSet.getEntryForIndex(0).setY(1.0f);
+            absoluteLineDataSet.getEntryForIndex(1).setY(1.0f);
+        }
+
+
+        NutrientFactory nutrientFactory = new NutrientFactory();
+        for(int i = 0; i < mBarData.getDataSetCount(); ++i){
+            BarDataSet absoluteDataSet = (BarDataSet)mBarData.getDataSets().get(i);
+            BarEntry barEntry = absoluteDataSet.getEntryForIndex(0);
+
+            String label = barEntry.getData().toString();
+            Nutrient.NType ntype = Nutrient.NType.valueOf(label);
+            Nutrient nutrient = nutrientFactory.buildNutrient(ntype);
+            float threshold = nutrient.getThreshold();
+
+            float[] oldYVals = barEntry.getYVals();
+            float[] newYVals = new float[oldYVals.length];
+            for(int j = 0; j < oldYVals.length; ++j){
+                newYVals[j] = oldYVals[j]/threshold;
+            }
+
+            barEntry.setVals(newYVals);
+
+        }
+
+        chart.getAxisLeft().setAxisMaxValue(1.2f);
+
+
+        chart.notifyDataSetChanged();
+
 
         return chart;
     }

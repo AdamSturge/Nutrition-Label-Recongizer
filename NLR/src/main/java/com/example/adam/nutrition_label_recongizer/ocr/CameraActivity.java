@@ -433,7 +433,9 @@ public class CameraActivity extends AppCompatActivity {
             FoodItem food = new FoodItem(nutrientVals,serving,calories);
             Log.e("CameraActivity",food.toString());
             Intent intent = new Intent(mActivity, MainActivity.class);
-            intent.putExtra(FOOD_INTENT_KEY,food);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(FOOD_INTENT_KEY,food);
+            intent.putExtra(FOOD_INTENT_KEY,bundle);
             mActivity.startActivity(intent);
 
         }

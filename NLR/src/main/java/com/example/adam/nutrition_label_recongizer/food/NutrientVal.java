@@ -11,21 +11,16 @@ import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
  */
 
 public class NutrientVal implements Parcelable {
-    public enum unit {GRAM,MILLIGRAM};
-
     Nutrient.NType mType;
     float mVal;
-    unit mUnit;
 
     private static final String NUTRIENT_TYPE_BUNDLE_KEY = "nutrient type";
     private static final String VALUE_BUNDLE_KEY = "value";
-    private static final String UNIT_BUNDLE_KEY = "unit";
 
 
-    public NutrientVal(Nutrient.NType name, float val, unit unit) {
+    public NutrientVal(Nutrient.NType name, float val) {
         mType = name;
         mVal = val;
-        mUnit = unit;
     }
 
     public Nutrient.NType getType() {
@@ -40,13 +35,9 @@ public class NutrientVal implements Parcelable {
         return mVal;
     }
 
-    public unit getUnit() {
-        return mUnit;
-    }
-
     @Override
     public String toString(){
-        return "{ type : " + mType.name() +", val : " + mVal+", unit : " + mUnit+" }";
+        return "{ type : " + mType.name() +", val : " + mVal+" }";
     }
 
     @Override
@@ -59,7 +50,6 @@ public class NutrientVal implements Parcelable {
         Bundle bundle = new Bundle();
         bundle.putSerializable(NUTRIENT_TYPE_BUNDLE_KEY, mType);
         bundle.putFloat(VALUE_BUNDLE_KEY,mVal);
-        bundle.putSerializable(UNIT_BUNDLE_KEY,mUnit);
 
         dest.writeBundle(bundle);
     }
@@ -71,9 +61,8 @@ public class NutrientVal implements Parcelable {
             Bundle bundle = source.readBundle();
             Nutrient.NType nType = (Nutrient.NType)bundle.getSerializable(NUTRIENT_TYPE_BUNDLE_KEY);
             float val = bundle.getFloat(VALUE_BUNDLE_KEY);
-            unit unit = (unit)bundle.getSerializable(UNIT_BUNDLE_KEY);
 
-            return new NutrientVal(nType,val,unit);
+            return new NutrientVal(nType,val);
         }
 
         @Override
