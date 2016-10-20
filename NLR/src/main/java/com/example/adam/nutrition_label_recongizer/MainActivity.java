@@ -66,9 +66,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mUserNutrientVals = mUserManager.loadUserNutrients();
         mPercentView = mUserManager.loadPercentViewPreference();
 
+
+        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
+        nv.add(new NutrientVal(Nutrient.NType.SODIUM,0));
+        nv.add(new NutrientVal(Nutrient.NType.FAT,0));
+        nv.add(new NutrientVal(Nutrient.NType.SATURATED,0));
+        nv.add(new NutrientVal(Nutrient.NType.TRANS,0));
+        nv.add(new NutrientVal(Nutrient.NType.CHOLESTEROL,2.9f));
+        nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,123));
+        nv.add(new NutrientVal(Nutrient.NType.SUGAR,0));
+        nv.add(new NutrientVal(Nutrient.NType.PROTEIN,2));
+        nv.add(new NutrientVal(Nutrient.NType.FIBRE,3));
+        mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);
+
+        mConsumeButton.setBackgroundColor(computeConsumeButtonColor(mUserNutrientVals));
+        mConsumeButton.setVisibility(View.VISIBLE);
+        drawChart(mFoodItem);
+
+        /*
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             Intent intent = getIntent();
             mFoodItem = intent.getBundleExtra(FOOD_INTENT_KEY).getParcelable(FOOD_INTENT_KEY);
+            mConsumeButton.setBackgroundColor(computeConsumeButtonColor(mUserNutrientVals));
             mConsumeButton.setVisibility(View.VISIBLE);
             drawChart(mFoodItem);
 
@@ -77,23 +96,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else{
             drawChart();
         }
-
-        /*
-        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
-        nv.add(new NutrientVal(Nutrient.NType.SODIUM,125, NutrientVal.unit.MILLIGRAM));
-        nv.add(new NutrientVal(Nutrient.NType.FAT,6, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.SATURATED,1, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.TRANS,0, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.CHOLESTEROL,15, NutrientVal.unit.MILLIGRAM));
-        nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,23, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.SUGAR,8, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.PROTEIN,2, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.FIBRE,3, NutrientVal.unit.GRAM));
-        mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);
         */
 
-    }
 
+
+    }
 
     @Override
     public void onResume() {
@@ -310,6 +317,58 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else{
             drawChart();
         }
+    }
+
+    /**
+     * Computes the color of the consume button so as to reflect how "healthy"
+     * the food under consideration is at this moment
+     * @param nutrientVals
+     * @return color
+     */
+    private int computeConsumeButtonColor(ArrayList<NutrientVal> nutrientVals){
+        if(mFoodItem == null){
+            return 0;
+        }
+
+        NutrientFactory nutrientFactory = new NutrientFactory();
+        FoodUtil foodUtil = new FoodUtil(mFoodItem);
+        float healthiness = 0.0f;
+        for(NutrientVal nutrientVal : nutrientVals){
+            Nutrient nutrient = nutrientFactory.buildNutrient(nutrientVal.getType());
+            NutrientVal foodVal = foodUtil.matchFoodNutrientToUserNutrient(nutrientVal);
+            /*
+             * If a food value is zero it should not contribute to the decision to eat the item.
+             * If a food value is non-zero then the new nutritional value for the user if they chose
+             * to eat it is used to calculate "healthiness".
+             */
+            float val = foodVal.getVal() != 0.0f ?  foodVal.getVal() + nutrientVal.getVal() : 0.0f;
+            float threshold = nutrient.getThreshold();
+            if(nutrient.isGood()){
+                float diff = 0.0f;
+                if(val < threshold){
+                   diff = Math.abs(threshold - val)/threshold;
+                }
+                healthiness += diff;
+            }else{
+                float diff = (threshold - val)/threshold;
+               healthiness += diff;
+            }
+        }
+
+        // cap to avoid overflow
+        if(healthiness > 600){
+            healthiness = 600;
+        }
+        if(healthiness < -600){
+            healthiness = -600;
+        }
+
+        // User a modified hyperbolic tangent to map the real line onto [badColor,goodColor]
+        int goodColor = getResources().getColor(R.color.goodNutrient, getTheme());
+        int badColor = getResources().getColor(R.color.badNutrient, getTheme());
+        int grad = (int)((goodColor*Math.exp(healthiness) + badColor*Math.exp(-healthiness))/(Math.exp(healthiness) + Math.exp(-healthiness)));
+
+        return grad;
     }
 
     /**
