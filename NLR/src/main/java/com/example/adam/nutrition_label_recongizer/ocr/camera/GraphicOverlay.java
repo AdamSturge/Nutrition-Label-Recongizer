@@ -6,18 +6,11 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-
-import android.content.Context;
-import android.graphics.Canvas;
-import android.util.AttributeSet;
-import android.view.View;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import com.google.android.gms.vision.*;
 
 /**
  * A view which renders a series of custom graphics to be overlaid on top of an associated preview
@@ -45,6 +38,8 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     private float mHeightScaleFactor = 1.0f;
     private int mFacing = CameraSource.CAMERA_FACING_BACK;
     private Set<T> mGraphics = new HashSet<>();
+    private Map<String,T> mPersistentGraphics = new HashMap<String,T>();
+    private ArrayList<IGraphicOverlaySubscriber> mSubscribers = new ArrayList<IGraphicOverlaySubscriber>();
 
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay.  Subclass
@@ -124,9 +119,15 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     /**
      * Removes all graphics from the overlay.
      */
-    public void clear() {
+    public void clear(boolean clearPersistent) {
         synchronized (mLock) {
-            mGraphics.clear();
+            if(clearPersistent){
+                mGraphics.clear();
+                mPersistentGraphics.clear();
+            }else{
+                mGraphics.retainAll(mPersistentGraphics.values());
+            }
+
         }
         postInvalidate();
     }
@@ -142,6 +143,16 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     }
 
     /**
+     * Adds a persistent graphic to the overlay
+     * @param graphic
+     */
+    public void addPersistent(String key,T graphic){
+        add(graphic);
+        mPersistentGraphics.put(key,graphic);
+        broadcastPersistentGraphicAdded(key,graphic);
+    }
+
+    /**
      * Removes a graphic from the overlay.
      */
     public void remove(T graphic) {
@@ -149,6 +160,39 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
             mGraphics.remove(graphic);
         }
         postInvalidate();
+    }
+
+    /**
+     * Adds a subscriber to the list of subscribers for this broadcasters events
+     * @param sub
+     */
+    public void subscribe(IGraphicOverlaySubscriber<T> sub){
+        mSubscribers.add(sub);
+    }
+
+    /**
+     * broadcasts to each subscriber that a new persistent graphic has been added
+     * @param graphic the new graphic
+     */
+    private void broadcastPersistentGraphicAdded(String key,T graphic){
+        for(IGraphicOverlaySubscriber<T> sub : mSubscribers){
+            sub.onPersistentGraphicAdded(key,graphic);
+        }
+    }
+
+    /**
+     * Returns the persistent graphic corresponding to the provided key,
+     * or null if no such graphic exists
+     * @param key
+     * @return T persistent graphic
+     */
+    public T getPersistentGraphic(String key){
+        if(mPersistentGraphics.containsKey(key)){
+            return mPersistentGraphics.get(key);
+        }else{
+            return null;
+        }
+
     }
 
     /**
@@ -201,6 +245,11 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
                 graphic.draw(canvas);
             }
         }
+    }
+
+    public interface IGraphicOverlaySubscriber<T extends GraphicOverlay.Graphic>{
+        public void onPersistentGraphicAdded(String key,T graphic);
+
     }
 }
 

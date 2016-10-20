@@ -19,7 +19,10 @@ import java.util.List;
 public class OcrGraphic extends GraphicOverlay.Graphic {
     private int mId;
 
-    private static final int TEXT_COLOR = Color.WHITE;
+    private static final int TEXT_COLOR = Color.BLACK;
+    private static final int BOUNDING_BOX_COLOR = Color.argb(125,255,255,255);
+    private static final float BOUNDING_BOX_PADDING = 10.0f;
+    private static final boolean DRAW_BOUNDING_BOX = true;
 
     private static Paint sRectPaint;
     private static Paint sTextPaint;
@@ -32,9 +35,11 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
 
         if (sRectPaint == null) {
             sRectPaint = new Paint();
-            sRectPaint.setColor(TEXT_COLOR);
-            sRectPaint.setStyle(Paint.Style.STROKE);
+            sRectPaint.setColor(BOUNDING_BOX_COLOR);
             sRectPaint.setStrokeWidth(4.0f);
+            sRectPaint.setStyle(Paint.Style.FILL);
+
+
         }
 
         if (sTextPaint == null) {
@@ -86,13 +91,15 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
             return;
         }
 
-        // Draws the bounding box around the TextBlock.
-        RectF rect = new RectF(mText.getBoundingBox());
-        rect.left = translateX(rect.left);
-        rect.top = translateY(rect.top);
-        rect.right = translateX(rect.right);
-        rect.bottom = translateY(rect.bottom);
-        canvas.drawRect(rect, sRectPaint);
+        if(DRAW_BOUNDING_BOX){
+            // Draws the bounding box around the TextBlock.
+            RectF rect = new RectF(mText.getBoundingBox());
+            rect.left = translateX(rect.left - BOUNDING_BOX_PADDING);
+            rect.top = translateY(rect.top - BOUNDING_BOX_PADDING);
+            rect.right = translateX(rect.right + BOUNDING_BOX_PADDING);
+            rect.bottom = translateY(rect.bottom + BOUNDING_BOX_PADDING);
+            canvas.drawRoundRect(rect,12,12,sRectPaint);
+        }
 
         // Break the text into multiple lines and draw each one according to its own bounding box.
         List<? extends Text> textComponents = mText.getComponents();

@@ -6,7 +6,7 @@ package com.example.adam.nutrition_label_recongizer.nutrient;
 
 public class SaturatedFat extends Nutrient {
     protected SaturatedFat(){
-        mType = NType.SAT_FAT;
+        mType = NType.SATURATED;
         mThreshold = 24f;
         mIsGood = false;
     }

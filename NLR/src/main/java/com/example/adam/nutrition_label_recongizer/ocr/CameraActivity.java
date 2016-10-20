@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.hardware.Camera;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -18,7 +19,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -29,25 +29,25 @@ import android.widget.Toast;
 import com.example.adam.nutrition_label_recongizer.MainActivity;
 import com.example.adam.nutrition_label_recongizer.R;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
+import com.example.adam.nutrition_label_recongizer.food.FoodItemBuilder;
+import com.example.adam.nutrition_label_recongizer.food.FoodItemException;
+import com.example.adam.nutrition_label_recongizer.food.NutrientInfoFromText;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
-import com.example.adam.nutrition_label_recongizer.food.NutrientValFactory;
 import com.example.adam.nutrition_label_recongizer.food.Serving;
+import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSource;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSourcePreview;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.GraphicOverlay;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.vision.text.Line;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AppCompatActivity implements GraphicOverlay.IGraphicOverlaySubscriber<OcrGraphic> {
 
     private static final String TAG = "CameraActivity";
 
@@ -71,6 +71,9 @@ public class CameraActivity extends AppCompatActivity {
     // Helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
+
+    // Builder that handles building up food item from OCR text
+    private FoodItemBuilder mFoodItemBuilder;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -103,6 +106,10 @@ public class CameraActivity extends AppCompatActivity {
 
         gestureDetector = new GestureDetector(this, new CaptureGestureListener());
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
+
+        mFoodItemBuilder = new FoodItemBuilder();
+
+        mGraphicOverlay.subscribe(this);
     }
 
     /**
@@ -339,6 +346,97 @@ public class CameraActivity extends AppCompatActivity {
         return text != null;*/
     }
 
+    @Override
+    public void onPersistentGraphicAdded(String key, OcrGraphic graphic) {
+        TextBlock item = graphic.getTextBlock();
+        NutrientInfoFromText nutrientInfoFromText = new NutrientInfoFromText();
+        Resources resources = this.getResources();
+        Log.e("GraphicAdded",key);
+
+        if(key.compareTo(resources.getString(R.string.PERSISTENT_GRAPHIC_SERVING)) == 0 && mFoodItemBuilder.getServing().getAmount() == -1.0f){
+            Serving serving = nutrientInfoFromText.extractServing(item);
+            mFoodItemBuilder.setServing(serving);
+        }else if(key.compareTo(resources.getString(R.string.PERSISTENT_GRAPHIC_CALORIES)) == 0 && mFoodItemBuilder.getCalories() == -1){
+            int calories = nutrientInfoFromText.extractCalories(item);
+            mFoodItemBuilder.setCalories(calories);
+        } else if(key.compareTo(Nutrient.NType.PROTEIN.name()) == 0 && mFoodItemBuilder.getProtein().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.PROTEIN){
+                    mFoodItemBuilder.setProtein(val);
+                    break;
+                }
+            }
+        }else if(key.compareTo(Nutrient.NType.CARBOHYDRATE.name()) == 0 && mFoodItemBuilder.getCarbohydrates().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.CARBOHYDRATE){
+                    mFoodItemBuilder.setCarbohydrates(val);
+                    break;
+                }
+            }
+        }else if(key.compareTo(Nutrient.NType.CHOLESTEROL.name()) == 0 && mFoodItemBuilder.getCholesterol().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.CHOLESTEROL){
+                    mFoodItemBuilder.setCholesterol(val);
+                    break;
+                }
+            }
+        }else if(key.compareTo(Nutrient.NType.FAT.name()) == 0 && mFoodItemBuilder.getFat().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.FAT){
+                    mFoodItemBuilder.setFat(val);
+                    break;
+                }
+            }
+        }else if(key.compareTo(Nutrient.NType.SATURATED.name()) == 0 && mFoodItemBuilder.getSaturated().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.SATURATED){
+                    mFoodItemBuilder.setSaturated(val);
+                    break;
+                }
+            }
+        }else if(key.compareTo(Nutrient.NType.TRANS.name()) == 0 && mFoodItemBuilder.getTrans().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.TRANS){
+                    mFoodItemBuilder.setTrans(val);
+                    break;
+                }
+            }
+        }
+        else if(key.compareTo(Nutrient.NType.SODIUM.name()) == 0 && mFoodItemBuilder.getSodium().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.SODIUM){
+                    mFoodItemBuilder.setSodium(val);
+                    break;
+                }
+            }
+        }
+        else if(key.compareTo(Nutrient.NType.SUGAR.name()) == 0 && mFoodItemBuilder.getSugar().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.SUGAR){
+                    mFoodItemBuilder.setSugar(val);
+                    break;
+                }
+            }
+        }
+        else if(key.compareTo(Nutrient.NType.FIBRE.name()) == 0 && mFoodItemBuilder.getFibre().getVal() == -1.0f){
+            ArrayList<NutrientVal> nutrientVals = nutrientInfoFromText.extractNutrientVals(item);
+            for(NutrientVal val : nutrientVals){
+                if(val.getType() == Nutrient.NType.FIBRE){
+                    mFoodItemBuilder.setFibre(val);
+                    break;
+                }
+            }
+        }
+    }
+
     private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
 
         @Override
@@ -414,7 +512,7 @@ public class CameraActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            SparseArray<TextBlock> detectionItems = mOcrDetectorProcesser.getDetectionItems().clone();
+/*            SparseArray<TextBlock> detectionItems = mOcrDetectorProcesser.getDetectionItems().clone();
             ArrayList<NutrientVal> nutrientVals = new ArrayList<NutrientVal>();
             int calories = 0;
             Serving serving = new Serving(-1,"");
@@ -430,22 +528,26 @@ public class CameraActivity extends AppCompatActivity {
                 nutrientVals.addAll(extractNutrientVals(textBlock));
 
             }
-
-            FoodItem food = new FoodItem(nutrientVals,serving,calories);
-            Log.e("CameraActivity",food.toString());
+*/
             Intent intent = new Intent(mActivity, MainActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(FOOD_INTENT_KEY,food);
-            intent.putExtra(FOOD_INTENT_KEY,bundle);
-            mActivity.startActivity(intent);
-
+            try{
+                FoodItem food = mFoodItemBuilder.build();
+                Log.e("CameraActivity",food.toString());
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(FOOD_INTENT_KEY,food);
+                intent.putExtra(FOOD_INTENT_KEY,bundle);
+            }catch (FoodItemException e){
+                Log.e("CameraActivity",e.getMessage());
+            }finally {
+                mActivity.startActivity(intent);
+            }
         }
 
         /**
          * Extracts nutrient values out of a textblock
          * @param textBlock
          * @return List of nutrient values
-         */
+         *//*
         private ArrayList<NutrientVal> extractNutrientVals(TextBlock textBlock){
             NutrientValFactory valFactory = new NutrientValFactory();
             ArrayList<NutrientVal> nutrientVals = new ArrayList<NutrientVal>();
@@ -459,11 +561,11 @@ public class CameraActivity extends AppCompatActivity {
             return nutrientVals;
         }
 
-        /**
+        *//**
          * Attempts to extract the number of calories out of the string contained in a textblock
          * @param textBlock
          * @return number of calories, or -1 if failed to extract the info
-         */
+         *//*
         private int extractCalories(TextBlock textBlock){
             try{
                 ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
@@ -482,39 +584,20 @@ public class CameraActivity extends AppCompatActivity {
             }
         }
 
-        /**
+        *//**
          * Attempts to extract the serving information out the the string contained in a textblock
          * @param textBlock
          * @return serving information, or null if failed
-         */
+         *//*
         private Serving extractServing(TextBlock textBlock){
-            try{
-                ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
-                Serving serving = null;
-                Pattern pattern = Pattern.compile("(^|\\s)(\\w*)(per\\s+)(\\d+)(/\\d+)?(\\s*)(\\w+)($|\\s)", Pattern.CASE_INSENSITIVE);
-                for(Line line : lines){
-                    Matcher matcher = pattern.matcher(line.getValue());
-                    if(matcher.find() && matcher.groupCount() >= 7){
-                        String numer =  numer = matcher.group(4);
-                        String denom = "1.0";
-                        if(matcher.group(5) != null){
-                            denom = matcher.group(5).substring(1); //remove division operator;
-                        }
-
-                        String unit = matcher.group(7);
-                        float amount = Float.parseFloat(numer)/Float.parseFloat(denom);
-                        serving = new Serving(amount,unit);
-                    }else{
-                        Log.e("extractServing","regex error");
-                    }
-                }
-                return serving;
+            ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
+            Serving serving = null;
+            Pattern pattern = Pattern.compile("(^|\\s)(\\w*)(per\\s+)(\\d+)(/\\d+)?(\\s*)(\\w+)($|\\s)", Pattern.CASE_INSENSITIVE);
+            ServingFactory servingFactory = new ServingFactory();
+            for(Line line : lines){
+                serving = servingFactory.buildFromText(line.getValue());
             }
-            catch (NumberFormatException e){
-                Log.e("extractServing",e.toString());
-                return null;
-            }
-
-        }
+            return serving;
+        }*/
     }
 }

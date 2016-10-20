@@ -6,7 +6,7 @@ package com.example.adam.nutrition_label_recongizer.nutrient;
 
 
 public abstract class Nutrient {
-    public enum NType {PROTEIN,CARBOHYDRATE,FAT,SAT_FAT,SUGAR,SODIUM,CHOLESTEROL,TRANS_FAT, FIBRE};
+    public enum NType {PROTEIN,CARBOHYDRATE,FAT,SATURATED,SUGAR,SODIUM,CHOLESTEROL,TRANS,FIBRE};
 
     protected NType mType;
     protected float mThreshold;

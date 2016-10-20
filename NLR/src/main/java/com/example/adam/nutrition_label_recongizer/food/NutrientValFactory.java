@@ -11,7 +11,10 @@ import java.util.regex.Pattern;
  * Created by Adam on 10/1/2016.
  */
 
-public class NutrientValFactory {
+class NutrientValFactory {
+
+    private final static String NUTRIENT_VALUE_REGEX = "(^|\\s)(\\d+(\\.\\d+)?)(\\s*)(\\w{1,2})($|\\s)";
+
     /**
      * Attempts to parse a block of text as a nutrient value by comparing the text
      * to the Nutrient.Ntype enum.
@@ -20,7 +23,7 @@ public class NutrientValFactory {
      */
     public NutrientVal buildFromText(String text){
         try{
-            Pattern pattern = Pattern.compile("(^|\\s)(\\d+)(\\s*)(\\w{1,2})($|\\s)"); //matches some number of spaces, number, unit, then some number of spaces
+            Pattern pattern = Pattern.compile(NUTRIENT_VALUE_REGEX); //matches some number of spaces, number, unit, then some number of spaces
 
             NutrientVal nutrientVal = null;
             text = text.toLowerCase();
@@ -31,7 +34,7 @@ public class NutrientValFactory {
                     Matcher matcher = pattern.matcher(text);
                     if(matcher.find()){
                         String stringVal = matcher.group(2);
-                        String stringUnit = matcher.group(4);
+                        String stringUnit = matcher.group(5);
 
                         float val = Float.parseFloat(stringVal);
                         switch (stringUnit){

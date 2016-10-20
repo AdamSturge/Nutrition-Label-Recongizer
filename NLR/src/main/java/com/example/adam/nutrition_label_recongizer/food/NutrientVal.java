@@ -71,4 +71,22 @@ public class NutrientVal implements Parcelable {
         }
     };
 
+    @Override
+    public boolean equals(Object obj){
+        if(obj == null){
+            return false;
+        }
+        if(!NutrientVal.class.isAssignableFrom(obj.getClass())){
+            return false;
+        }
+        final NutrientVal other = (NutrientVal)obj;
+        if(this.mType != other.getType()){
+            return false;
+        }
+        if(this.mVal != other.getVal()){
+            return false;
+        }
+        return true;
+    }
+
 }

@@ -6,7 +6,7 @@ package com.example.adam.nutrition_label_recongizer.nutrient;
 
 public class TransFat extends Nutrient {
     protected TransFat(){
-        mType = NType.TRANS_FAT;
+        mType = NType.TRANS;
         mThreshold = 2.0f;
         mIsGood = false;
     }

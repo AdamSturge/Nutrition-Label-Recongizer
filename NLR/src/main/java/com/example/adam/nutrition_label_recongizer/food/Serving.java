@@ -62,4 +62,23 @@ public class Serving implements Parcelable{
             return new Serving[size];
         }
     };
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj == null){
+            return false;
+        }
+        if(!Serving.class.isAssignableFrom(obj.getClass())){
+            return false;
+        }
+        Serving other = (Serving)obj;
+        if(this.mAmount != other.getAmount()){
+            return  false;
+        }
+        if(this.mUnit.compareTo(other.getUnit()) != 0){
+            return false;
+        }
+        return true;
+
+    }
 }

@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_marginTop="10dp"
-        android:theme="@style/Widget.AppCompat.Button.Colored"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:visibility="gone"
         android:text="@string/consume_food" />
 

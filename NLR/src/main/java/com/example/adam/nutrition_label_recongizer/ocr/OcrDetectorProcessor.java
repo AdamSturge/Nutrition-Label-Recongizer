@@ -1,5 +1,6 @@
 package com.example.adam.nutrition_label_recongizer.ocr;
 
+import android.content.res.Resources;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -8,9 +9,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.adam.nutrition_label_recongizer.R;
+import com.example.adam.nutrition_label_recongizer.food.NutrientInfoFromText;
+import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
+import com.example.adam.nutrition_label_recongizer.food.Serving;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.GraphicOverlay;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.TextBlock;
+
+import java.util.ArrayList;
 
 
 /**
@@ -20,10 +27,12 @@ import com.google.android.gms.vision.text.TextBlock;
 public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
     private SparseArray<TextBlock> mDetectionItems;
+    private NutrientInfoFromText mNutrientInfoFromText;
 
     OcrDetectorProcessor(GraphicOverlay<OcrGraphic> ocrGraphicOverlay) {
         mGraphicOverlay = ocrGraphicOverlay;
         mDetectionItems = new SparseArray<TextBlock>();
+        mNutrientInfoFromText = new NutrientInfoFromText();
     }
 
     /**
@@ -35,15 +44,35 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      */
     @Override
     public void receiveDetections(Detector.Detections<TextBlock> detections) {
-        mGraphicOverlay.clear();
+        mGraphicOverlay.clear(false);
         mDetectionItems = detections.getDetectedItems();
+        Resources resouces = mGraphicOverlay.getContext().getResources();
         for (int i = 0; i < mDetectionItems.size(); ++i) {
             TextBlock item = mDetectionItems.valueAt(i);
             if (item != null && item.getValue() != null) {
-                Log.d("OcrDetectorProcessor", "Text detected! " + item.getValue());
+
+                ArrayList<NutrientVal> nutrientVals = mNutrientInfoFromText.extractNutrientVals(item);
+                for(NutrientVal nutrientVal : nutrientVals){
+                    final String key = nutrientVal.getName().toUpperCase();
+                    if(mGraphicOverlay.getPersistentGraphic(key) == null){
+                        OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
+                        mGraphicOverlay.addPersistent(key,graphic);
+                    }
+                }
+
+                Serving serving = mNutrientInfoFromText.extractServing(item);
+                if(mGraphicOverlay.getPersistentGraphic(resouces.getString(R.string.PERSISTENT_GRAPHIC_SERVING)) == null && serving != null){
+                    OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
+                    mGraphicOverlay.addPersistent(resouces.getString(R.string.PERSISTENT_GRAPHIC_SERVING),graphic);
+                }
+
+                int calories = mNutrientInfoFromText.extractCalories(item);
+                if(mGraphicOverlay.getPersistentGraphic(resouces.getString(R.string.PERSISTENT_GRAPHIC_CALORIES)) == null && calories != -1){
+                    OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
+                    mGraphicOverlay.addPersistent(resouces.getString(R.string.PERSISTENT_GRAPHIC_CALORIES),graphic);
+                }
             }
-            OcrGraphic graphic = new OcrGraphic(mGraphicOverlay, item);
-            mGraphicOverlay.add(graphic);
+
         }
     }
 
@@ -52,7 +81,7 @@ public class OcrDetectorProcessor implements Detector.Processor<TextBlock> {
      */
     @Override
     public void release() {
-        mGraphicOverlay.clear();
+        mGraphicOverlay.clear(false);
     }
 
     public SparseArray<TextBlock> getDetectionItems() {

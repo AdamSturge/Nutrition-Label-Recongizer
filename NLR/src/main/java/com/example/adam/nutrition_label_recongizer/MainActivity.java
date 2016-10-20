@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 
 import com.example.adam.nutrition_label_recongizer.charting.NutrientChartBuilder;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
+import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
 import com.example.adam.nutrition_label_recongizer.food.Serving;
 import com.example.adam.nutrition_label_recongizer.food.comparator.NutrientValComparatorIsGood;
@@ -81,8 +82,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
         nv.add(new NutrientVal(Nutrient.NType.SODIUM,125, NutrientVal.unit.MILLIGRAM));
         nv.add(new NutrientVal(Nutrient.NType.FAT,6, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.SAT_FAT,1, NutrientVal.unit.GRAM));
-        nv.add(new NutrientVal(Nutrient.NType.TRANS_FAT,0, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.SATURATED,1, NutrientVal.unit.GRAM));
+        nv.add(new NutrientVal(Nutrient.NType.TRANS,0, NutrientVal.unit.GRAM));
         nv.add(new NutrientVal(Nutrient.NType.CHOLESTEROL,15, NutrientVal.unit.MILLIGRAM));
         nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,23, NutrientVal.unit.GRAM));
         nv.add(new NutrientVal(Nutrient.NType.SUGAR,8, NutrientVal.unit.GRAM));
@@ -230,13 +231,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void drawChart(FoodItem foodItem){
         NutrientChartBuilder chartBuilder = new NutrientChartBuilder(getApplicationContext());
         NutrientFactory nutrientFactory = new NutrientFactory();
+        FoodUtil foodUtil = new FoodUtil(foodItem);
 
         Collections.sort(mUserNutrientVals,new NutrientValComparatorIsGood());
 
         for(NutrientVal nutrientVal : mUserNutrientVals){
             Nutrient nutrient = nutrientFactory.buildNutrient(nutrientVal.getType());
-            NutrientVal foodVal = matchFoodNutrientToUserNutrient(foodItem,nutrientVal);
-            if(foodVal != null){
+            NutrientVal foodVal = foodUtil.matchFoodNutrientToUserNutrient(nutrientVal);
+            if(foodVal.getVal() != -1.0f){
                 chartBuilder.addNutrient(new Pair<NutrientVal, NutrientVal>(nutrientVal,foodVal),nutrient.isGood(),true);
             }else{
                 chartBuilder.addNutrient(nutrientVal,nutrient.isGood(),false);
@@ -257,59 +259,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     /**
-     * Matches user nutrient values to food item nutrient values based on nutrient type
-     * TO DO : Maybe move this method somewhere else
-     * @param userNutrient
-     * @return
-     */
-    private NutrientVal matchFoodNutrientToUserNutrient(FoodItem foodItem, NutrientVal userNutrient){
-        if(mFoodItem == null){
-            return null;
-        }
-        ArrayList<NutrientVal> foodVals = foodItem.getNutrients();
-        for(NutrientVal nv : foodVals){
-            if(nv.getType() == userNutrient.getType()){
-                return nv;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Called when the user selects a new serving size from the serving size dialog
      * @param dialog
      */
     @Override
     public void onServingSizeSet(ServingSizeDialog dialog) {
         float servingSize = dialog.getServingSize();
-        adjustFoodItemServingSize(servingSize);
+        FoodUtil foodUtil = new FoodUtil(mFoodItem);
+        mFoodItem = foodUtil.adjustFoodItemServingSize(servingSize);
         drawChart(mFoodItem);
-    }
-
-    /**
-     * Adjusts nutritional values of the provided food item to reflect a serving size
-     * specified by the provided serving size
-     * TO DO: MOVE THIS SOMEWHERE ELSE
-     * @param newServingSize new serving size to adjust nutrients to
-     * @return a new food item where all values have been scaled by the ratio of the old serving size
-     * to the new serving size
-     */
-    private void adjustFoodItemServingSize(float newServingSize){
-        ArrayList<NutrientVal> foodVals = mFoodItem.getNutrients();
-        float oldServingSize = mFoodItem.getServing().getAmount();
-
-        float ratio = newServingSize/oldServingSize;
-
-        ArrayList<NutrientVal> adjustedFoodVals = new ArrayList<NutrientVal>();
-        for(NutrientVal val : foodVals){
-            adjustedFoodVals.add(new NutrientVal(val.getType(),ratio*val.getVal()));
-        }
-
-        Serving adjustedServing = new Serving(newServingSize,mFoodItem.getServing().getUnit());
-        int adjustedCalories = (int)ratio*mFoodItem.getCalories();
-
-        mFoodItem = new FoodItem(adjustedFoodVals,adjustedServing,adjustedCalories);
-
     }
 
     /**
@@ -401,9 +359,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          * Updates member variable of user nutrients to add consumed food values
          */
         private void updateUserNutrientVals(){
+            FoodUtil foodUtil = new FoodUtil(mFoodItem);
             ArrayList<NutrientVal> updatedNutrients = new ArrayList<NutrientVal>();
             for(NutrientVal nutrientVal : mUserNutrientVals){
-                NutrientVal foodVal = matchFoodNutrientToUserNutrient(mFoodItem,nutrientVal);
+                NutrientVal foodVal = foodUtil.matchFoodNutrientToUserNutrient(nutrientVal);
                 if(foodVal != null){
                     updatedNutrients.add(new NutrientVal(nutrientVal.getType(),nutrientVal.getVal() + foodVal.getVal()));
                 }else{

@@ -19,7 +19,7 @@ public class NutrientFactory {
             case FAT:
                 nutrient = new Fat();
                 break;
-            case SAT_FAT:
+            case SATURATED:
                 nutrient = new SaturatedFat();
                 break;
             case SUGAR:
@@ -31,7 +31,7 @@ public class NutrientFactory {
             case CHOLESTEROL:
                 nutrient = new Cholesterol();
                 break;
-            case TRANS_FAT:
+            case TRANS:
                 nutrient = new TransFat();
                 break;
             case FIBRE:
