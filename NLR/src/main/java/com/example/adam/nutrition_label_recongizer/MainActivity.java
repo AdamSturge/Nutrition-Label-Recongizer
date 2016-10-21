@@ -1,6 +1,7 @@
 package com.example.adam.nutrition_label_recongizer;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +18,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.example.adam.nutrition_label_recongizer.charting.NutrientChartBuilder;
+import com.example.adam.nutrition_label_recongizer.food.FoodHealthChecker;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
@@ -67,23 +69,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mPercentView = mUserManager.loadPercentViewPreference();
 
 
-        ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
+       /* ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
         nv.add(new NutrientVal(Nutrient.NType.SODIUM,0));
         nv.add(new NutrientVal(Nutrient.NType.FAT,0));
         nv.add(new NutrientVal(Nutrient.NType.SATURATED,0));
         nv.add(new NutrientVal(Nutrient.NType.TRANS,0));
-        nv.add(new NutrientVal(Nutrient.NType.CHOLESTEROL,2.9f));
-        nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,123));
+        nv.add(new NutrientVal(Nutrient.NType.CHOLESTEROL,0.1f));
+        nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,210));
         nv.add(new NutrientVal(Nutrient.NType.SUGAR,0));
-        nv.add(new NutrientVal(Nutrient.NType.PROTEIN,2));
-        nv.add(new NutrientVal(Nutrient.NType.FIBRE,3));
+        nv.add(new NutrientVal(Nutrient.NType.PROTEIN,30));
+        nv.add(new NutrientVal(Nutrient.NType.FIBRE,10));
         mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);
 
         mConsumeButton.setBackgroundColor(computeConsumeButtonColor(mUserNutrientVals));
         mConsumeButton.setVisibility(View.VISIBLE);
-        drawChart(mFoodItem);
+        drawChart(mFoodItem);*/
 
-        /*
+
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             Intent intent = getIntent();
             mFoodItem = intent.getBundleExtra(FOOD_INTENT_KEY).getParcelable(FOOD_INTENT_KEY);
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else{
             drawChart();
         }
-        */
+
 
 
 
@@ -329,46 +331,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(mFoodItem == null){
             return 0;
         }
+        FoodHealthChecker healthChecker = new FoodHealthChecker();
+        float healthiness = healthChecker.relativeHealth(nutrientVals,mFoodItem);
 
-        NutrientFactory nutrientFactory = new NutrientFactory();
-        FoodUtil foodUtil = new FoodUtil(mFoodItem);
-        float healthiness = 0.0f;
-        for(NutrientVal nutrientVal : nutrientVals){
-            Nutrient nutrient = nutrientFactory.buildNutrient(nutrientVal.getType());
-            NutrientVal foodVal = foodUtil.matchFoodNutrientToUserNutrient(nutrientVal);
-            /*
-             * If a food value is zero it should not contribute to the decision to eat the item.
-             * If a food value is non-zero then the new nutritional value for the user if they chose
-             * to eat it is used to calculate "healthiness".
-             */
-            float val = foodVal.getVal() != 0.0f ?  foodVal.getVal() + nutrientVal.getVal() : 0.0f;
-            float threshold = nutrient.getThreshold();
-            if(nutrient.isGood()){
-                float diff = 0.0f;
-                if(val < threshold){
-                   diff = Math.abs(threshold - val)/threshold;
-                }
-                healthiness += diff;
-            }else{
-                float diff = (threshold - val)/threshold;
-               healthiness += diff;
-            }
-        }
-
-        // cap to avoid overflow
         if(healthiness > 600){
             healthiness = 600;
-        }
-        if(healthiness < -600){
+        }else if(healthiness < -600){
             healthiness = -600;
         }
 
-        // User a modified hyperbolic tangent to map the real line onto [badColor,goodColor]
         int goodColor = getResources().getColor(R.color.goodNutrient, getTheme());
         int badColor = getResources().getColor(R.color.badNutrient, getTheme());
-        int grad = (int)((goodColor*Math.exp(healthiness) + badColor*Math.exp(-healthiness))/(Math.exp(healthiness) + Math.exp(-healthiness)));
+
+        int goodRed = Color.red(goodColor);
+        int badRed = Color.red(badColor);
+        int buttonRed = (int)cappedColor(healthiness,goodRed,badRed,1);
+
+        int goodGreen = Color.green(goodColor);
+        int badGreen = Color.green(badColor);
+        int buttonGreen = (int)cappedColor(healthiness,goodGreen,badGreen,1);
+
+        int goodBlue = Color.blue(goodColor);
+        int badBlue = Color.blue(badColor);
+        int buttonBlue = (int)cappedColor(healthiness,goodBlue,badBlue,1);
+
+        int grad = Color.rgb(buttonRed,buttonGreen,buttonBlue);
 
         return grad;
+    }
+
+    /**
+     * Modified hyperbolic tangent function
+     * @param x arg for tanh
+     * @param a limit as x -> infinity
+     * @param b limit as x -> -infinity
+     * @param scale scale factor to adjust arg
+     * @return double in (a,b)
+     */
+    private double cappedColor(double x,double a,double b, double scale){
+        return ((a*Math.exp(scale*x) + b*Math.exp(-scale*x))/(Math.exp(scale*x) + Math.exp(-scale*x)));
     }
 
     /**
