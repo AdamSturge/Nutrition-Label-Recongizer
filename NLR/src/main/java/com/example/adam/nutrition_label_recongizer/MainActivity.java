@@ -37,7 +37,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,ServingSizeDialog.ServingSizeDialogListener {
 
-    private Button mConsumeButton;
+    private ConsumeButton mConsumeButton;
     private CombinedChart mChart;
     private Menu mMenu;
 
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         initializeDrawer(toolbar);
 
-        mConsumeButton = (Button)findViewById(R.id.consume_food_button);
+        mConsumeButton = (ConsumeButton)findViewById(R.id.consume_food_button);
         mConsumeButton.setOnClickListener(new OnConsumeClickListener());
 
         mUserManager = new UserManager(getPreferences(getApplicationContext().MODE_PRIVATE));
@@ -69,16 +69,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mPercentView = mUserManager.loadPercentViewPreference();
 
 
-       /* ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
+        /*ArrayList<NutrientVal> nv = new ArrayList<NutrientVal>();
         nv.add(new NutrientVal(Nutrient.NType.SODIUM,0));
         nv.add(new NutrientVal(Nutrient.NType.FAT,0));
         nv.add(new NutrientVal(Nutrient.NType.SATURATED,0));
         nv.add(new NutrientVal(Nutrient.NType.TRANS,0));
         nv.add(new NutrientVal(Nutrient.NType.CHOLESTEROL,0.1f));
-        nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,210));
-        nv.add(new NutrientVal(Nutrient.NType.SUGAR,0));
-        nv.add(new NutrientVal(Nutrient.NType.PROTEIN,30));
-        nv.add(new NutrientVal(Nutrient.NType.FIBRE,10));
+        nv.add(new NutrientVal(Nutrient.NType.CARBOHYDRATE,150));
+        nv.add(new NutrientVal(Nutrient.NType.SUGAR,1));
+        nv.add(new NutrientVal(Nutrient.NType.PROTEIN,10));
+        nv.add(new NutrientVal(Nutrient.NType.FIBRE,1));
         mFoodItem = new FoodItem(nv,new Serving(1,"pouch"),150);
 
         mConsumeButton.setBackgroundColor(computeConsumeButtonColor(mUserNutrientVals));
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             Intent intent = getIntent();
             mFoodItem = intent.getBundleExtra(FOOD_INTENT_KEY).getParcelable(FOOD_INTENT_KEY);
-            mConsumeButton.setBackgroundColor(computeConsumeButtonColor(mUserNutrientVals));
+            mConsumeButton.updateColor(mUserNutrientVals,mFoodItem,getTheme());
             mConsumeButton.setVisibility(View.VISIBLE);
             drawChart(mFoodItem);
 
@@ -98,10 +98,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else{
             drawChart();
         }
-
-
-
-
     }
 
     @Override
@@ -319,57 +315,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else{
             drawChart();
         }
-    }
-
-    /**
-     * Computes the color of the consume button so as to reflect how "healthy"
-     * the food under consideration is at this moment
-     * @param nutrientVals
-     * @return color
-     */
-    private int computeConsumeButtonColor(ArrayList<NutrientVal> nutrientVals){
-        if(mFoodItem == null){
-            return 0;
-        }
-        FoodHealthChecker healthChecker = new FoodHealthChecker();
-        float healthiness = healthChecker.relativeHealth(nutrientVals,mFoodItem);
-
-        if(healthiness > 600){
-            healthiness = 600;
-        }else if(healthiness < -600){
-            healthiness = -600;
-        }
-
-        int goodColor = getResources().getColor(R.color.goodNutrient, getTheme());
-        int badColor = getResources().getColor(R.color.badNutrient, getTheme());
-
-        int goodRed = Color.red(goodColor);
-        int badRed = Color.red(badColor);
-        int buttonRed = (int)cappedColor(healthiness,goodRed,badRed,1);
-
-        int goodGreen = Color.green(goodColor);
-        int badGreen = Color.green(badColor);
-        int buttonGreen = (int)cappedColor(healthiness,goodGreen,badGreen,1);
-
-        int goodBlue = Color.blue(goodColor);
-        int badBlue = Color.blue(badColor);
-        int buttonBlue = (int)cappedColor(healthiness,goodBlue,badBlue,1);
-
-        int grad = Color.rgb(buttonRed,buttonGreen,buttonBlue);
-
-        return grad;
-    }
-
-    /**
-     * Modified hyperbolic tangent function
-     * @param x arg for tanh
-     * @param a limit as x -> infinity
-     * @param b limit as x -> -infinity
-     * @param scale scale factor to adjust arg
-     * @return double in (a,b)
-     */
-    private double cappedColor(double x,double a,double b, double scale){
-        return ((a*Math.exp(scale*x) + b*Math.exp(-scale*x))/(Math.exp(scale*x) + Math.exp(-scale*x)));
     }
 
     /**

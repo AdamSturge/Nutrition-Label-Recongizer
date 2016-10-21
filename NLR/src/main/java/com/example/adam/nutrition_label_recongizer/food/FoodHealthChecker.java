@@ -55,4 +55,38 @@ public class FoodHealthChecker {
         return healthiness;
     }
 
+    /**
+     * Computes the "healtiness" of a food item, irrespective of any nutrients the user may have consumed
+     * @param foodItem
+     * @return "healtiness" value. The higher the better. Range is (-Inf,Inf)
+     */
+    public float absoluteHealth(FoodItem foodItem){
+        NutrientFactory nutrientFactory = new NutrientFactory();
+        float healthiness = 0.0f;
+        ArrayList<NutrientVal> foodVals = foodItem.getNutrients();
+        for(NutrientVal foodVal : foodVals) {
+            Nutrient nutrient = nutrientFactory.buildNutrient(foodVal.getType());
+            /*
+             * If a food value is zero it should not contribute to the decision to eat the item.
+             */
+            if (foodVal.getVal() != 0.0f) {
+                float val = foodVal.getVal();
+                float threshold = nutrient.getThreshold();
+                if (val == threshold) {
+                    val += 0.0001f; // add a milligram to avoid division by zero
+                }
+                float diff = 0.0f;
+                float arg = threshold / Math.abs(threshold - val);
+                if (nutrient.isGood()) {
+                    diff = (float) Math.exp(arg);
+                } else {
+                    diff = -(float) Math.exp(arg);
+
+                }
+                healthiness += diff;
+            }
+        }
+        return healthiness;
+    }
+
 }
