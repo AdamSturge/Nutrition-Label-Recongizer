@@ -2,7 +2,9 @@ package com.example.adam.nutrition_label_recongizer.food;
 
 import android.util.Log;
 
+import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 import com.google.android.gms.vision.text.Line;
+import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 
 import java.util.ArrayList;
@@ -114,5 +116,21 @@ public class NutrientInfoFromText {
     public Serving extractServing(String text){
         ServingFactory servingFactory = new ServingFactory();
         return servingFactory.buildFromText(text);
+    }
+
+    public void scrubTextBlock(TextBlock textBlock, ArrayList<Nutrient.NType> filter, boolean keepLinesWithNoData){
+        ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
+        for(int i = 0; i < lines.size(); ++i){
+            NutrientVal nutrientVal = extractNutrientVals(lines.get(i).getValue());
+            if(nutrientVal != null){
+                if(filter.contains(nutrientVal.getType())){
+                   lines.remove(i);
+                    i--; //decrement to stay in same place since array to the right shifted down one
+                }
+            }else if(!keepLinesWithNoData){
+                lines.remove(i);
+                i--;//decrement to stay in same place since array to the right shifted down one
+            }
+        }
     }
 }

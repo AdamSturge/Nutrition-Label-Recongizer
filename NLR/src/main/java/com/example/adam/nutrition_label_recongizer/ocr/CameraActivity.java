@@ -512,92 +512,36 @@ public class CameraActivity extends AppCompatActivity implements GraphicOverlay.
 
         @Override
         public void onClick(View v) {
-/*            SparseArray<TextBlock> detectionItems = mOcrDetectorProcesser.getDetectionItems().clone();
-            ArrayList<NutrientVal> nutrientVals = new ArrayList<NutrientVal>();
-            int calories = 0;
-            Serving serving = new Serving(-1,"");
-            for(int i = 0; i < detectionItems.size(); ++i) {
-                int j = detectionItems.keyAt(i);
-                TextBlock textBlock = detectionItems.get(j);
-                if(textBlock.getValue().toLowerCase().contains("calories")){
-                    calories = extractCalories(textBlock);
-                }
-                if(textBlock.getValue().toLowerCase().contains("per")){
-                    serving = extractServing(textBlock);
-                }
-                nutrientVals.addAll(extractNutrientVals(textBlock));
 
-            }
-*/
-            Intent intent = new Intent(mActivity, MainActivity.class);
             try{
+                Intent intent = new Intent(mActivity, MainActivity.class);
                 FoodItem food = mFoodItemBuilder.build();
                 Log.e("CameraActivity",food.toString());
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(FOOD_INTENT_KEY,food);
                 intent.putExtra(FOOD_INTENT_KEY,bundle);
+                mActivity.startActivity(intent);
+                mActivity.finish();
             }catch (FoodItemException e){
                 Log.e("CameraActivity",e.getMessage());
-            }finally {
-                mActivity.startActivity(intent);
+                new AlertDialog.Builder(mActivity)
+                        .setTitle("Error detected:")
+                        .setMessage(e.getMessage() + "\n\nPressing confirm will restart the capture")
+                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                Intent intent = new Intent(mActivity,CameraActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                startActivity(intent);
+                                mActivity.finish();
+                            }
+                        })
+                        .create()
+                        .show();
             }
         }
 
-        /**
-         * Extracts nutrient values out of a textblock
-         * @param textBlock
-         * @return List of nutrient values
-         *//*
-        private ArrayList<NutrientVal> extractNutrientVals(TextBlock textBlock){
-            NutrientValFactory valFactory = new NutrientValFactory();
-            ArrayList<NutrientVal> nutrientVals = new ArrayList<NutrientVal>();
-            ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
-            for(Line line : lines){
-                NutrientVal nutrientVal = valFactory.buildFromText(line.getValue());
-                if(nutrientVal != null){
-                    nutrientVals.add(nutrientVal);
-                }
-            }
-            return nutrientVals;
-        }
-
-        *//**
-         * Attempts to extract the number of calories out of the string contained in a textblock
-         * @param textBlock
-         * @return number of calories, or -1 if failed to extract the info
-         *//*
-        private int extractCalories(TextBlock textBlock){
-            try{
-                ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
-                int calories = -1;
-                for(Line line : lines){
-                    if(line.getValue().toLowerCase().contains("calories")){
-                        String numbers = line.getValue().replaceAll("[^0-9]","");
-                        calories = numbers.isEmpty() ? -1 : Integer.parseInt(numbers);
-                    }
-                }
-                return calories;
-            }
-            catch (NumberFormatException e){
-                Log.e("extractCalories",e.toString());
-                return -1;
-            }
-        }
-
-        *//**
-         * Attempts to extract the serving information out the the string contained in a textblock
-         * @param textBlock
-         * @return serving information, or null if failed
-         *//*
-        private Serving extractServing(TextBlock textBlock){
-            ArrayList<Line> lines = (ArrayList<Line>)textBlock.getComponents();
-            Serving serving = null;
-            Pattern pattern = Pattern.compile("(^|\\s)(\\w*)(per\\s+)(\\d+)(/\\d+)?(\\s*)(\\w+)($|\\s)", Pattern.CASE_INSENSITIVE);
-            ServingFactory servingFactory = new ServingFactory();
-            for(Line line : lines){
-                serving = servingFactory.buildFromText(line.getValue());
-            }
-            return serving;
-        }*/
     }
 }

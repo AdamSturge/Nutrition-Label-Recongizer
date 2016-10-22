@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.google.android.gms.vision.text.TextBlock;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,7 +40,7 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
     private float mHeightScaleFactor = 1.0f;
     private int mFacing = CameraSource.CAMERA_FACING_BACK;
     private Set<T> mGraphics = new HashSet<>();
-    private Map<String,T> mPersistentGraphics = new HashMap<String,T>();
+    private HashMap<String,T> mPersistentGraphics = new HashMap<String,T>();
     private ArrayList<IGraphicOverlaySubscriber> mSubscribers = new ArrayList<IGraphicOverlaySubscriber>();
 
     /**
@@ -193,6 +195,14 @@ public class GraphicOverlay<T extends GraphicOverlay.Graphic> extends View {
             return null;
         }
 
+    }
+
+    /**
+     * getter for PersistentGraphics
+     * @return
+     */
+    public HashMap<String,T> getPersistentGraphics(){
+        return mPersistentGraphics;
     }
 
     /**
