@@ -32,15 +32,15 @@ public class ConsumeButton extends Button {
      * Updates the color of the consume button so as to reflect how "healthy"
      * the food under consideration is at this moment
      *
-     * @param nutrientVals
+     * @param foodItem
+     * @param theme activity theme
      * @return updated color
      */
-    public int updateColor(ArrayList<NutrientVal> nutrientVals, FoodItem foodItem, Resources.Theme theme) {
+    public int updateColor(FoodItem foodItem, Resources.Theme theme) {
         if (foodItem == null) {
             return 0;
         }
         FoodHealthChecker healthChecker = new FoodHealthChecker();
-        //float healthiness = healthChecker.relativeHealth(nutrientVals,mFoodItem);
         float healthiness = healthChecker.absoluteHealth(foodItem);
 
         if (healthiness > 600) {

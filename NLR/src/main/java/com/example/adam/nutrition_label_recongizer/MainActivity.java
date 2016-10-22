@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             Intent intent = getIntent();
             mFoodItem = intent.getBundleExtra(FOOD_INTENT_KEY).getParcelable(FOOD_INTENT_KEY);
-            mConsumeButton.updateColor(mUserNutrientVals,mFoodItem,getTheme());
+            //mConsumeButton.updateColor(mFoodItem,getTheme());
             mConsumeButton.setVisibility(View.VISIBLE);
             drawChart(mFoodItem);
 
