@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onResume() {
         super.onResume();  // Always call the superclass method first
-        //loadUserNutrients(); NEED TO DO SOME TESTING TO SEE IF THIS IS REQUIRED
 
     }
 
@@ -291,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mPercentView = true;
         mMenu.findItem(R.id.action_percent_view).setVisible(false);
         mMenu.findItem(R.id.action_absolute_view).setVisible(true);
-        mUserManager.savePercentViewPreference(mPercentView); // TO DO: Can probably put this off until OnPause
+        mUserManager.savePercentViewPreference(mPercentView);
         if(mFoodItem != null){
             drawChart(mFoodItem);
         }else{
@@ -306,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mPercentView = false;
         mMenu.findItem(R.id.action_percent_view).setVisible(true);
         mMenu.findItem(R.id.action_absolute_view).setVisible(false);
-        mUserManager.savePercentViewPreference(mPercentView); // TO DO: Can probably put this off until OnPause
+        mUserManager.savePercentViewPreference(mPercentView);
         if(mFoodItem != null){
             drawChart(mFoodItem);
         }else{
