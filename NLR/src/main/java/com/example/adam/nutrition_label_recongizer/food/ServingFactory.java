@@ -1,10 +1,5 @@
 package com.example.adam.nutrition_label_recongizer.food;
 
-import android.util.Log;
-
-import com.google.android.gms.vision.text.Line;
-
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

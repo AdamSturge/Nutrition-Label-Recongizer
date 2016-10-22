@@ -9,7 +9,6 @@ import com.example.adam.nutrition_label_recongizer.ocr.camera.GraphicOverlay;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 
-
 import java.util.List;
 
 /**

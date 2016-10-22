@@ -1,13 +1,7 @@
 package com.example.adam.nutrition_label_recongizer.ocr;
 
 import android.content.res.Resources;
-import android.support.design.widget.Snackbar;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.SparseArray;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.adam.nutrition_label_recongizer.R;
 import com.example.adam.nutrition_label_recongizer.food.NutrientInfoFromText;
@@ -20,7 +14,6 @@ import com.google.android.gms.vision.text.TextBlock;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Set;
 
 
 /**

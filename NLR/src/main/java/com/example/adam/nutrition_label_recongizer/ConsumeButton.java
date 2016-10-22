@@ -4,19 +4,10 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 
 import com.example.adam.nutrition_label_recongizer.food.FoodHealthChecker;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
-import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
-import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Adam on 10/21/2016.

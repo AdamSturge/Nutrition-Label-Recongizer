@@ -1,7 +1,6 @@
 package com.example.adam.nutrition_label_recongizer.user;
 
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
 import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;

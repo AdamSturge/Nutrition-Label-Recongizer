@@ -4,11 +4,9 @@ import android.util.Log;
 
 import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 import com.google.android.gms.vision.text.Line;
-import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 
 import java.util.ArrayList;
-import java.util.regex.Pattern;
 
 /**
  * Created by Adam on 10/20/2016.

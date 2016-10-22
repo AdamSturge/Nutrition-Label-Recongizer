@@ -1,13 +1,12 @@
 package com.example.adam.nutrition_label_recongizer;
 
 import android.content.Intent;
-import android.graphics.Color;
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
@@ -18,18 +17,17 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.example.adam.nutrition_label_recongizer.charting.NutrientChartBuilder;
-import com.example.adam.nutrition_label_recongizer.food.FoodHealthChecker;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
-import com.example.adam.nutrition_label_recongizer.food.Serving;
 import com.example.adam.nutrition_label_recongizer.food.comparator.NutrientValComparatorIsGood;
 import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 import com.example.adam.nutrition_label_recongizer.nutrient.NutrientFactory;
 import com.example.adam.nutrition_label_recongizer.ocr.CameraActivity;
 import com.example.adam.nutrition_label_recongizer.user.UserManager;
-import com.github.mikephil.charting.charts.*;
-import com.github.mikephil.charting.data.*;
+import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -92,8 +90,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //mConsumeButton.updateColor(mFoodItem,getTheme());
             mConsumeButton.setVisibility(View.VISIBLE);
             drawChart(mFoodItem);
-
-            // TO DO: SOME KIND OF ALERT IF SERVING SIZE OR CALORIE INFO WAS NOT EXTRACTED
 
         }else{
             drawChart();

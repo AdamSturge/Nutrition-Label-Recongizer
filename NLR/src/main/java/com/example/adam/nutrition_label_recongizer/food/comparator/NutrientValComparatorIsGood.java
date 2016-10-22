@@ -2,8 +2,8 @@ package com.example.adam.nutrition_label_recongizer.food.comparator;
 
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
 import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
-import com.example.adam.nutrition_label_recongizer.nutrient.comparator.NutrientComparatorIsGood;
 import com.example.adam.nutrition_label_recongizer.nutrient.NutrientFactory;
+import com.example.adam.nutrition_label_recongizer.nutrient.comparator.NutrientComparatorIsGood;
 
 import java.util.Comparator;
 

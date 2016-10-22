@@ -12,9 +12,6 @@ import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.adam.nutrition_label_recongizer.food.FoodItem;
-import com.example.adam.nutrition_label_recongizer.food.Serving;
-
 /**
  * Created by Adam on 10/16/2016.
  */

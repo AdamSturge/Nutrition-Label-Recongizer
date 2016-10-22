@@ -2,7 +2,6 @@ package com.example.adam.nutrition_label_recongizer.charting;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.util.Pair;
 
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;

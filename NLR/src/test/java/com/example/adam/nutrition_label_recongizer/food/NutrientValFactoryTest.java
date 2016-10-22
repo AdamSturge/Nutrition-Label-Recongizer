@@ -4,7 +4,8 @@ import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by Adam on 10/20/2016.
