@@ -9,5 +9,6 @@ public class TransFat extends Nutrient {
         mType = NType.TRANS;
         mThreshold = 2.0f;
         mIsGood = false;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 }

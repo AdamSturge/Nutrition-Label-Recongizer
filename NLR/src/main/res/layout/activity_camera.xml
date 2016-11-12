@@ -3,6 +3,7 @@
     android:id="@+id/activity_camera"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -18,24 +19,26 @@
             android:layout_height="match_parent" />
 
     </com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSourcePreview>
-    <!--
-    <Button
-        android:id="@+id/camera_capture_button"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:text="@string/camera_capture" />
-        -->
-
+<!--
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/camera_capture_button"
         android:src="@drawable/ic_done_white_24dp"
         app:fabSize="normal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="top|center"
+        android:layout_margin="16dp"
+        app:layout_anchor="@id/preview"
+        app:layout_anchorGravity="top|center_horizontal"/> -->
+
+    <com.github.lzyzsd.circleprogress.CircleProgress
+        android:id="@+id/circle_progress"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
         android:layout_gravity="bottom|center"
         android:layout_margin="16dp"
         app:layout_anchor="@id/preview"
-        app:layout_anchorGravity="bottom|center_horizontal"/>
+        app:layout_anchorGravity="bottom|center_horizontal"
+        custom:circle_progress="0"/>
 
 </android.support.design.widget.CoordinatorLayout>

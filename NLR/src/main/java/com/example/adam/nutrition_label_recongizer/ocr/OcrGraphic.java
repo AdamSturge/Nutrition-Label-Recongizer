@@ -21,7 +21,8 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
     private static final int TEXT_COLOR = Color.BLACK;
     private static final int BOUNDING_BOX_COLOR = Color.argb(125,255,255,255);
     private static final float BOUNDING_BOX_PADDING = 10.0f;
-    private static final boolean DRAW_BOUNDING_BOX = true;
+    private static final boolean DRAW_BOUNDING_BOX = false;
+    private static final boolean DRAW_TEXT = false;
 
     private static Paint sRectPaint;
     private static Paint sTextPaint;
@@ -100,12 +101,14 @@ public class OcrGraphic extends GraphicOverlay.Graphic {
             canvas.drawRoundRect(rect,12,12,sRectPaint);
         }
 
-        // Break the text into multiple lines and draw each one according to its own bounding box.
-        List<? extends Text> textComponents = mText.getComponents();
-        for(Text currentText : textComponents) {
-            float left = translateX(currentText.getBoundingBox().left);
-            float bottom = translateY(currentText.getBoundingBox().bottom);
-            canvas.drawText(currentText.getValue(), left, bottom, sTextPaint);
+        if(DRAW_TEXT){
+            // Break the text into multiple lines and draw each one according to its own bounding box.
+            List<? extends Text> textComponents = mText.getComponents();
+            for(Text currentText : textComponents) {
+                float left = translateX(currentText.getBoundingBox().left);
+                float bottom = translateY(currentText.getBoundingBox().bottom);
+                canvas.drawText(currentText.getValue(), left, bottom, sTextPaint);
+            }
         }
     }
 }

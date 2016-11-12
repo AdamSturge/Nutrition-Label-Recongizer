@@ -9,6 +9,7 @@ public class Fat extends Nutrient {
         mType = NType.FAT;
         mThreshold = 70f;
         mIsGood = false;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 
 }

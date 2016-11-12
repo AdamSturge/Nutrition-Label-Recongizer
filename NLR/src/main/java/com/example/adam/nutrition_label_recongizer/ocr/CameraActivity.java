@@ -31,6 +31,7 @@ import com.example.adam.nutrition_label_recongizer.R;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.FoodItemBuilder;
 import com.example.adam.nutrition_label_recongizer.food.FoodItemException;
+import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
 import com.example.adam.nutrition_label_recongizer.food.NutrientInfoFromText;
 import com.example.adam.nutrition_label_recongizer.food.NutrientVal;
 import com.example.adam.nutrition_label_recongizer.food.Serving;
@@ -38,6 +39,7 @@ import com.example.adam.nutrition_label_recongizer.nutrient.Nutrient;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSource;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.CameraSourcePreview;
 import com.example.adam.nutrition_label_recongizer.ocr.camera.GraphicOverlay;
+import com.github.lzyzsd.circleprogress.CircleProgress;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.vision.text.TextBlock;
@@ -51,6 +53,8 @@ public class CameraActivity extends AppCompatActivity implements GraphicOverlay.
 
     private static final String TAG = "CameraActivity";
 
+    private static final String FOOD_INTENT_KEY = "food";
+
     // Intent request code to handle updating play services if needed.
     private static final int RC_HANDLE_GMS = 9001;
 
@@ -60,13 +64,12 @@ public class CameraActivity extends AppCompatActivity implements GraphicOverlay.
     // Constants used to pass extra data in the intent
     public static final String AutoFocus = "AutoFocus";
     public static final String UseFlash = "UseFlash";
-    public static final String TextBlockObject = "String";
 
     private CameraSource mCameraSource;
     private CameraSourcePreview mPreview;
     private GraphicOverlay<OcrGraphic> mGraphicOverlay;
     private OcrDetectorProcessor mOcrDetectorProcesser;
-    private FloatingActionButton mCaptureButton;
+    private CircleProgress mProgress;
 
     // Helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
@@ -85,9 +88,14 @@ public class CameraActivity extends AppCompatActivity implements GraphicOverlay.
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<OcrGraphic>) findViewById(R.id.graphic_overlay);
-        mCaptureButton = (FloatingActionButton) findViewById(R.id.camera_capture_button);
 
-        mCaptureButton.setOnClickListener(new OnCaptureClickListener(this));
+        mProgress = (CircleProgress)findViewById(R.id.circle_progress);
+        mProgress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendToMainActivity();
+            }
+        });
 
         mOcrDetectorProcesser = new OcrDetectorProcessor(mGraphicOverlay);
 
@@ -351,7 +359,6 @@ public class CameraActivity extends AppCompatActivity implements GraphicOverlay.
         TextBlock item = graphic.getTextBlock();
         NutrientInfoFromText nutrientInfoFromText = new NutrientInfoFromText();
         Resources resources = this.getResources();
-        Log.e("GraphicAdded",key);
 
         if(key.compareTo(resources.getString(R.string.PERSISTENT_GRAPHIC_SERVING)) == 0 && mFoodItemBuilder.getServing().getAmount() == -1.0f){
             Serving serving = nutrientInfoFromText.extractServing(item);
@@ -435,6 +442,21 @@ public class CameraActivity extends AppCompatActivity implements GraphicOverlay.
                 }
             }
         }
+
+        //update progress UI
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(mProgress.getProgress() != mFoodItemBuilder.getPercentComplete()){
+                    mProgress.setProgress(mFoodItemBuilder.getPercentComplete());
+                    if(mProgress.getProgress() == 100){
+                        sendToMainActivity();
+                    }
+                }
+            }
+        });
+
+
     }
 
     private class CaptureGestureListener extends GestureDetector.SimpleOnGestureListener {
@@ -501,47 +523,38 @@ public class CameraActivity extends AppCompatActivity implements GraphicOverlay.
         }
     }
 
-    private class OnCaptureClickListener implements Button.OnClickListener{
+    /**
+     * Creates food item and starts main activity with food item as intent extra
+     */
+    private void sendToMainActivity(){
+        try{
+            Intent intent = new Intent(this, MainActivity.class);
+            FoodItem food = mFoodItemBuilder.build();
+            Log.e("CameraActivity",food.toString());
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(FOOD_INTENT_KEY,food);
+            intent.putExtra(FOOD_INTENT_KEY,bundle);
+            startActivity(intent);
+            finish();
+        }catch (FoodItemException e){
+            Log.e("CameraActivity",e.getMessage());
+            new AlertDialog.Builder(this)
+                    .setTitle("Error detected:")
+                    .setMessage(e.getMessage() + "\n\nPressing confirm will restart the capture")
+                    .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
 
-        private Activity mActivity;
-        private static final String FOOD_INTENT_KEY = "food";
-
-        public OnCaptureClickListener(Activity activity){
-            mActivity = activity;
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            Intent intent = new Intent(CameraActivity.this,MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                            startActivity(intent);
+                            finish();
+                        }
+                    })
+                    .create()
+                    .show();
         }
-
-        @Override
-        public void onClick(View v) {
-
-            try{
-                Intent intent = new Intent(mActivity, MainActivity.class);
-                FoodItem food = mFoodItemBuilder.build();
-                Log.e("CameraActivity",food.toString());
-                Bundle bundle = new Bundle();
-                bundle.putParcelable(FOOD_INTENT_KEY,food);
-                intent.putExtra(FOOD_INTENT_KEY,bundle);
-                mActivity.startActivity(intent);
-                mActivity.finish();
-            }catch (FoodItemException e){
-                Log.e("CameraActivity",e.getMessage());
-                new AlertDialog.Builder(mActivity)
-                        .setTitle("Error detected:")
-                        .setMessage(e.getMessage() + "\n\nPressing confirm will restart the capture")
-                        .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                Intent intent = new Intent(mActivity,CameraActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                startActivity(intent);
-                                mActivity.finish();
-                            }
-                        })
-                        .create()
-                        .show();
-            }
-        }
-
     }
+
 }

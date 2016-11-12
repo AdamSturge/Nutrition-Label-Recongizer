@@ -2,12 +2,12 @@ package com.example.adam.nutrition_label_recongizer;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.Button;
 
-import com.example.adam.nutrition_label_recongizer.food.FoodHealthChecker;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
+import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
 
 /**
  * Created by Adam on 10/21/2016.
@@ -31,8 +31,9 @@ public class ConsumeButton extends Button {
         if (foodItem == null) {
             return 0;
         }
-        FoodHealthChecker healthChecker = new FoodHealthChecker();
-        float healthiness = healthChecker.absoluteHealth(foodItem);
+        FoodUtil foodUtil = new FoodUtil(foodItem);
+        float healthiness = foodUtil.HealthIndex();
+        Log.e("ADAM","HI:"+foodUtil.HealthIndex());
 
         if (healthiness > 600) {
             healthiness = 600;
@@ -43,19 +44,7 @@ public class ConsumeButton extends Button {
         int goodColor = getResources().getColor(R.color.goodNutrient, theme);
         int badColor = getResources().getColor(R.color.badNutrient, theme);
 
-        int goodRed = Color.red(goodColor);
-        int badRed = Color.red(badColor);
-        int buttonRed = (int) cappedColor(healthiness, goodRed, badRed, 1);
-
-        int goodGreen = Color.green(goodColor);
-        int badGreen = Color.green(badColor);
-        int buttonGreen = (int) cappedColor(healthiness, goodGreen, badGreen, 1);
-
-        int goodBlue = Color.blue(goodColor);
-        int badBlue = Color.blue(badColor);
-        int buttonBlue = (int) cappedColor(healthiness, goodBlue, badBlue, 1);
-
-        int grad = Color.rgb(buttonRed, buttonGreen, buttonBlue);
+        int grad = (int) (healthiness*badColor + (1-healthiness)*goodColor); //convex combination of bad and good color
 
         this.setBackgroundColor(grad);
 

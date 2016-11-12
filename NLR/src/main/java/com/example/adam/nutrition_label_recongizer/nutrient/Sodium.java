@@ -9,5 +9,6 @@ public class Sodium extends Nutrient {
         mType = NType.SODIUM;
         mThreshold = 2.3f;
         mIsGood = false;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 }

@@ -9,6 +9,7 @@ class Protein extends Nutrient {
         mType = NType.PROTEIN;
         mThreshold = 50f;
         mIsGood = true;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 
 }

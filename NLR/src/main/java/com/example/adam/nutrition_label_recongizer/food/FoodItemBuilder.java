@@ -20,6 +20,7 @@ public class FoodItemBuilder {
     private NutrientVal mSodium;
     private Serving mServing;
     private int mCalories;
+    private int mPercentComplete;
 
     public FoodItemBuilder(){
         mProtein = new NutrientVal(Nutrient.NType.PROTEIN,-1.0f);
@@ -33,6 +34,7 @@ public class FoodItemBuilder {
         mSodium = new NutrientVal(Nutrient.NType.SODIUM,-1.0f);
         mServing = new Serving(-1.0f,"");
         mCalories = -1;
+        mPercentComplete = 0;
     }
 
     public NutrientVal getProtein() {
@@ -41,6 +43,7 @@ public class FoodItemBuilder {
 
     public void setProtein(NutrientVal mProtein) {
         this.mProtein = mProtein;
+        mPercentComplete++;
     }
 
     public NutrientVal getCarbohydrates() {
@@ -49,6 +52,7 @@ public class FoodItemBuilder {
 
     public void setCarbohydrates(NutrientVal mCarbohydrates) {
         this.mCarbohydrates = mCarbohydrates;
+        mPercentComplete++;
     }
 
     public NutrientVal getFat() {
@@ -57,6 +61,7 @@ public class FoodItemBuilder {
 
     public void setFat(NutrientVal mFat) {
         this.mFat = mFat;
+        mPercentComplete++;
     }
 
     public NutrientVal getSaturated() {
@@ -65,6 +70,7 @@ public class FoodItemBuilder {
 
     public void setSaturated(NutrientVal mSaturated) {
         this.mSaturated = mSaturated;
+        mPercentComplete++;
     }
 
     public NutrientVal getTrans() {
@@ -73,6 +79,7 @@ public class FoodItemBuilder {
 
     public void setTrans(NutrientVal mTrans) {
         this.mTrans = mTrans;
+        mPercentComplete++;
     }
 
     public NutrientVal getSugar() {
@@ -81,6 +88,7 @@ public class FoodItemBuilder {
 
     public void setSugar(NutrientVal mSugar) {
         this.mSugar = mSugar;
+        mPercentComplete++;
     }
 
     public NutrientVal getFibre() {
@@ -89,6 +97,7 @@ public class FoodItemBuilder {
 
     public void setFibre(NutrientVal mFibre) {
         this.mFibre = mFibre;
+        mPercentComplete++;
     }
 
     public NutrientVal getCholesterol() {
@@ -97,6 +106,7 @@ public class FoodItemBuilder {
 
     public void setCholesterol(NutrientVal mCholesterol) {
         this.mCholesterol = mCholesterol;
+        mPercentComplete++;
     }
 
     public NutrientVal getSodium() {
@@ -105,6 +115,7 @@ public class FoodItemBuilder {
 
     public void setSodium(NutrientVal mSodium) {
         this.mSodium = mSodium;
+        mPercentComplete++;
     }
 
     public Serving getServing() {
@@ -113,6 +124,7 @@ public class FoodItemBuilder {
 
     public void setServing(Serving mServing) {
         this.mServing = mServing;
+        mPercentComplete++;
     }
 
     public int getCalories() {
@@ -121,6 +133,16 @@ public class FoodItemBuilder {
 
     public void setCalories(int mCalories) {
         this.mCalories = mCalories;
+        mPercentComplete++;
+    }
+
+    /**
+     * Gets how close the food item builder is to having all the info
+     * needed to build a correct food item
+     * @return percentage 0 <= p <= 100
+     */
+    public int getPercentComplete(){
+        return (mPercentComplete/11)*100;
     }
 
     public FoodItem build() throws FoodItemException{

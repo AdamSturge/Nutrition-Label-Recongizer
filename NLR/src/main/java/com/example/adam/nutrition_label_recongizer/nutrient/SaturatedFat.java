@@ -9,5 +9,6 @@ public class SaturatedFat extends Nutrient {
         mType = NType.SATURATED;
         mThreshold = 24f;
         mIsGood = false;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 }

@@ -9,5 +9,6 @@ public class Fibre extends Nutrient{
         mType = NType.FIBRE;
         mThreshold = 21f;
         mIsGood = true;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 }

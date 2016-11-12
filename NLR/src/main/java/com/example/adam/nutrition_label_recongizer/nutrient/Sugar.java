@@ -9,5 +9,6 @@ public class Sugar extends Nutrient {
         mType = NType.SUGAR;
         mThreshold = 90f;
         mIsGood = false;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 }

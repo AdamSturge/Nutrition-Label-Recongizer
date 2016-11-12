@@ -9,5 +9,6 @@ public class Cholesterol extends Nutrient {
         mType = NType.CHOLESTEROL;
         mThreshold = 0.2f;
         mIsGood = false;
+        mHealthFactor = mThreshold/THRESHOLD_SUM;
     }
 }
