@@ -107,19 +107,19 @@ public class FoodUtil {
             }
         }
 
-        float HF = 0.0f;
+        float HV = 0.0f;
         NutrientFactory nutrientFactory = new NutrientFactory();
         for(NutrientVal val : nutrientVals){
             Nutrient nutrient = nutrientFactory.buildNutrient(val.getType());
             float s = (val.getVal()/Nutrient.THRESHOLD_SUM)*(1/numNonZero);
-            HF += s*nutrient.getHealthFactor();
+            HV += s*nutrient.getHealthFactor();
 
         }
 
 
-        HF = HF/0.2963f; // Max HV based on foods that maximize their nutrient thresholds
+        HV = HV/0.2963f; // Max HV based on foods that maximize their nutrient thresholds
         // Log.e("ADAM","HF:"+HF);
-        return HF;
+        return HV;
     }
 
     /**
