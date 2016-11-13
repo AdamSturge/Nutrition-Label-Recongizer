@@ -7,22 +7,14 @@
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
     <string name="low_storage_error">Ocr dependencies cannot be downloaded due to low device storage</string>
     <string name="consume_food">"Consume"</string>
+    <string name="do_not_consume_food">"Do Not Consume"</string>
     <string name="action_serving_size">Adjust serving size</string>
     <string name="action_serving_size_set">Set</string>
     <string name="action_serving_size_cancel">Cancel</string>
     <string name="action_percent_view">Percent view</string>
     <string name="action_absolute_view">Absolute view</string>
     <string name="email">adam.sturge@mail.utoronto.ca</string>
-    <!--<string name="PERSISTENT_GRAPHIC_KEY_PREFIX">PERSISTENT_GRAPHIC_</string>--> <!-- MUST BE THE PREFIX TO ALL KEYS FOR PERSISTENT GRAPHICS -->
     <string name="PERSISTENT_GRAPHIC_SERVING">SERVING</string>
     <string name="PERSISTENT_GRAPHIC_CALORIES">CALORIES</string>
-    <!--<string name="PERSISTENT_GRAPHIC_PROTEIN">PROTEIN</string>
-    <string name="PERSISTENT_GRAPHIC_CARBOHYDRATE">CARBOHYDRATE</string>
-    <string name="PERSISTENT_GRAPHIC_FAT">FAT</string>
-    <string name="PERSISTENT_GRAPHIC_SATURATED">SATURATED</string>
-    <string name="PERSISTENT_GRAPHIC_TRANS">TRANS</string>
-    <string name="PERSISTENT_GRAPHIC_FIBRE">FIBRE</string>
-    <string name="PERSISTENT_GRAPHIC_SUGAR">SUGAR</string>
-    <string name="PERSISTENT_GRAPHIC_SODIUM">SODIUM</string>
-    <string name="PERSISTENT_GRAPHIC_CHOLESTEROL">CHOLESTEROL</string>-->
+
 </resources>

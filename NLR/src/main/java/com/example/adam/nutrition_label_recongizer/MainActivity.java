@@ -28,6 +28,7 @@ import com.example.adam.nutrition_label_recongizer.user.UserManager;
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,ServingSizeDialog.ServingSizeDialogListener {
 
     private ConsumeButton mConsumeButton;
+    private DoNotConsumeButton mDoNotConsumeButton;
     private CombinedChart mChart;
     private Menu mMenu;
 
@@ -60,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mConsumeButton = (ConsumeButton)findViewById(R.id.consume_food_button);
         mConsumeButton.setOnClickListener(new OnConsumeClickListener());
+
+        mDoNotConsumeButton = (DoNotConsumeButton)findViewById(R.id.do_not_consume_food_button);
+        mDoNotConsumeButton.setOnClickListener(new OnDoNotConsumeClickListener());
 
         mUserManager = new UserManager(getPreferences(getApplicationContext().MODE_PRIVATE));
         //mUserManager.resetUserNutrients();
@@ -87,8 +92,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(getIntent().hasExtra(FOOD_INTENT_KEY)){
             Intent intent = getIntent();
             mFoodItem = intent.getBundleExtra(FOOD_INTENT_KEY).getParcelable(FOOD_INTENT_KEY);
+
             mConsumeButton.updateColor(mFoodItem,getTheme());
             mConsumeButton.setVisibility(View.VISIBLE);
+
+            mDoNotConsumeButton.updateColor(mFoodItem,getTheme());
+            mDoNotConsumeButton.setVisibility(View.VISIBLE);
+
             drawChart(mFoodItem);
 
         }else{
@@ -324,15 +334,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void onClick(View v) {
             mConsumeButton.setVisibility(View.GONE);
+            mDoNotConsumeButton.setVisibility(View.GONE);
             mMenu.findItem(R.id.action_serving_size).setEnabled(false);
 
-            for(NutrientVal x : mUserNutrientVals){
-                Log.e("BEFORE UPDATE",x.toString());
-            }
             updateUserNutrientVals();
-            for(NutrientVal x : mUserNutrientVals){
-                Log.e("AFTER UPDATE",x.toString());
-            }
             updateBarColors();
 
             mFoodItem = null;
@@ -372,6 +377,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             mUserNutrientVals = updatedNutrients;
+        }
+    }
+
+    private class OnDoNotConsumeClickListener implements Button.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            mDoNotConsumeButton.setVisibility(View.GONE);
+            mConsumeButton.setVisibility(View.GONE);
+            mMenu.findItem(R.id.action_serving_size).setEnabled(false);
+            updateBarColors();
+            mFoodItem = null;
+        }
+
+        /**
+         * updates bar colors reflected newly consumed food item
+         */
+        private void updateBarColors(){
+            BarData barData = mChart.getBarData();
+            for(int i = 0; i < barData.getDataSetCount(); ++i){
+                BarDataSet set = (BarDataSet)barData.getDataSetByIndex(i);
+                BarEntry entry = set.getEntryForIndex(0);
+                entry.setVals(new float[]{entry.getYVals()[0]});
+            }
+
+            mChart.invalidate();
         }
     }
 

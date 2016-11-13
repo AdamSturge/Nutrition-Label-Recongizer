@@ -18,13 +18,22 @@
         android:layout_weight="1.0"/>
 
     <com.example.adam.nutrition_label_recongizer.ConsumeButton
-        android:id="@+id/consume_food_button"
+    android:id="@+id/consume_food_button"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_marginTop="10dp"
+    style="@style/Widget.AppCompat.Button.Colored"
+    android:visibility="gone"
+    android:text="@string/consume_food" />
+
+    <com.example.adam.nutrition_label_recongizer.DoNotConsumeButton
+        android:id="@+id/do_not_consume_food_button"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_marginTop="10dp"
         style="@style/Widget.AppCompat.Button.Colored"
         android:visibility="gone"
-        android:text="@string/consume_food" />
+        android:text="@string/do_not_consume_food" />
 
 </LinearLayout>
 

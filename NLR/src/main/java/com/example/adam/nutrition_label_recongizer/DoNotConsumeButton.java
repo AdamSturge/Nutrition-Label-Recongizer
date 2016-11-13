@@ -3,9 +3,9 @@ package com.example.adam.nutrition_label_recongizer;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.Button;
 
+import com.example.adam.nutrition_label_recongizer.R;
 import com.example.adam.nutrition_label_recongizer.food.FoodItem;
 import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
 
@@ -13,9 +13,9 @@ import com.example.adam.nutrition_label_recongizer.food.FoodUtil;
  * Created by Adam on 10/21/2016.
  */
 
-public class ConsumeButton extends Button {
+public class DoNotConsumeButton extends Button {
 
-    public ConsumeButton(Context context, AttributeSet attrs) {
+    public DoNotConsumeButton(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
@@ -33,11 +33,11 @@ public class ConsumeButton extends Button {
         }
         FoodUtil foodUtil = new FoodUtil(foodItem);
         float healthiness = foodUtil.HealthIndex();
-
+        
         int goodColor = getResources().getColor(R.color.goodNutrient, theme);
         int badColor = getResources().getColor(R.color.badNutrient, theme);
 
-        int grad = (int) (healthiness*goodColor + (1-healthiness)*badColor); //convex combination of bad and good color
+        int grad = (int) (healthiness*badColor + (1-healthiness)*goodColor); //convex combination of bad and good color
 
         this.setBackgroundColor(grad);
 
