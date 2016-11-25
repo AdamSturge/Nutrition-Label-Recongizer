@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Nutrition-Label-Recongizer</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="ok">OK</string>
+    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
+    <string name="low_storage_error">Ocr dependencies cannot be downloaded due to low device storage</string>
+    <string name="consume_food">"Consume"</string>
+    <string name="do_not_consume_food">"Do Not Consume"</string>
+    <string name="action_serving_size">Adjust serving size</string>
+    <string name="action_serving_size_set">Set</string>
+    <string name="action_serving_size_cancel">Cancel</string>
+    <string name="action_percent_view">Percent view</string>
+    <string name="action_absolute_view">Absolute view</string>
+    <string name="email">adam.sturge@mail.utoronto.ca</string>
+    <string name="PERSISTENT_GRAPHIC_SERVING">SERVING</string>
+    <string name="PERSISTENT_GRAPHIC_CALORIES">CALORIES</string>
+
+</resources>
